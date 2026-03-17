@@ -1,0 +1,25 @@
+@reference "tailwindcss";
+
+.container {
+  @apply min-h-screen bg-gray-50 p-6 font-sans text-gray-800 w-full overflow-x-hidden relative;
+}
+
+.contentWrapper {
+  @apply max-w-7xl mx-auto space-y-6 w-full;
+}
+
+.header {
+  @apply bg-white p-6 rounded-xl shadow-sm border border-gray-200;
+}
+
+.title {
+  @apply text-2xl font-bold text-gray-900 mb-2;
+}
+
+.subtitle {
+  @apply text-sm text-gray-500;
+}
+
+.mainLayout {
+  @apply flex flex-col lg:flex-row gap-6 items-start w-full;
+}

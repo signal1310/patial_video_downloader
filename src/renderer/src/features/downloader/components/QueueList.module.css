@@ -1,0 +1,37 @@
+@reference "tailwindcss";
+
+.container {
+  @apply flex-1 w-full bg-white p-6 rounded-xl shadow-sm border border-gray-200;
+}
+
+.header {
+  @apply flex justify-between items-center mb-4 border-b pb-2;
+}
+
+.title {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.badge {
+  @apply text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-sm ml-2;
+}
+
+.emptyState {
+  @apply text-center py-16 bg-gray-50 rounded-lg border border-dashed border-gray-300;
+}
+
+.emptyIcon {
+  @apply mx-auto h-12 w-12 text-gray-400;
+}
+
+.emptyTitle {
+  @apply mt-4 text-sm text-gray-500 font-medium;
+}
+
+.emptySubtitle {
+  @apply mt-1 text-xs text-gray-400;
+}
+
+.list {
+  @apply space-y-4;
+}

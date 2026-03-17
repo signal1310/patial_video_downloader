@@ -1,0 +1,29 @@
+@reference "tailwindcss";
+
+.button {
+  @apply inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500 border border-gray-300;
+}
+
+.danger {
+  @apply bg-white text-red-600 hover:bg-red-50 focus:ring-red-500 border border-red-200;
+}
+
+.sm {
+  @apply px-3 py-1.5 text-sm;
+}
+
+.md {
+  @apply px-4 py-2 text-sm;
+}
+
+.lg {
+  @apply px-6 py-3 text-base;
+}

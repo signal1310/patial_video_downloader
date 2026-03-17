@@ -1,0 +1,194 @@
+@reference "tailwindcss";
+
+/* ── Card shell ── */
+.card {
+  @apply bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow transition-shadow relative overflow-hidden;
+  padding: 12px 14px;
+}
+
+.progressBackground {
+  @apply absolute inset-0 bg-blue-50/40 pointer-events-none transition-all duration-300 ease-out;
+  /* Use a slight clip to prevent leakage at card edges */
+  clip-path: inset(0 0 0 0);
+}
+
+/* ── Single-row layout ── */
+.row {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Left info block */
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusBadge {
+  @apply px-2 py-0.5 text-xs font-semibold rounded-full;
+}
+
+.statusDone {
+  @apply bg-green-100 text-green-700;
+}
+.statusError {
+  @apply bg-red-100 text-red-700;
+}
+.statusDownloading {
+  @apply bg-blue-100 text-blue-700 animate-pulse;
+}
+.statusCancelled {
+  @apply bg-gray-100 text-gray-500;
+}
+.statusDefault {
+  @apply bg-gray-100 text-gray-700;
+}
+
+.progressText {
+  @apply text-xs font-medium text-blue-600;
+}
+
+.urlText {
+  @apply text-sm font-medium text-gray-800 truncate cursor-help;
+}
+
+.timeRange {
+  @apply text-xs text-gray-400;
+}
+
+/* ── Right icon actions ── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.sep {
+  display: block;
+  width: 1px;
+  height: 14px;
+  background: #e5e7eb;
+  margin: 0 3px;
+}
+
+/* Base icon button */
+.iconBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.iconBtn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Active state (logs / command panel open) */
+.iconBtnActive {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.iconBtnActive:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Cancel — red tint */
+.iconBtnDanger {
+  color: #f87171;
+}
+.iconBtnDanger:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Delete — muted grey */
+.iconBtnDelete {
+  color: #d1d5db;
+}
+.iconBtnDelete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Mini badge on logs icon */
+.logBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 2px;
+  border-radius: 99px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 13px;
+  text-align: center;
+}
+
+/* ── Expandable details ── */
+.details {
+  position: relative;
+  z-index: 10;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.commandBox {
+  @apply bg-gray-800 text-green-400 p-3 rounded-lg text-xs font-mono overflow-auto whitespace-pre-wrap;
+}
+
+.logsBox {
+  @apply bg-black text-gray-300 p-3 rounded-lg text-xs font-mono select-text overflow-hidden flex flex-col shadow-inner;
+  height: 240px;
+}
+
+.logsHeader {
+  @apply text-gray-500 mb-2 select-none border-b border-gray-800 pb-1 flex justify-between items-center shrink-0;
+}
+
+.logsContent {
+  @apply flex-1 overflow-y-auto min-h-0 space-y-1 pr-2;
+}
+
+.logsEmpty {
+  @apply text-gray-600 text-center py-4;
+}
+
+.logLine {
+  @apply break-all;
+}
+.logWarning {
+  @apply text-yellow-400;
+}
+.logError {
+  @apply text-red-400 font-bold;
+}

@@ -1,0 +1,92 @@
+@reference "tailwindcss";
+
+.container {
+  @apply w-full flex flex-col gap-1;
+}
+
+@media (min-width: 768px) {
+  .container {
+    @apply flex-row items-center gap-2;
+  }
+}
+
+.label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+@media (min-width: 768px) {
+  .label {
+    @apply text-sm shrink-0 min-w-[55px];
+  }
+}
+
+.inputBox {
+  @apply flex items-center bg-white border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all select-none;
+  box-shadow: none !important;
+  height: 38px;
+  width: 100%;
+}
+
+.segments {
+  @apply flex items-center justify-center flex-1 px-0.5;
+}
+
+/* Hide native number spin buttons */
+.segmentInput::-webkit-outer-spin-button,
+.segmentInput::-webkit-inner-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.segmentWrapper {
+  @apply flex flex-col items-center justify-center;
+}
+
+.segmentInput {
+  @apply w-7 text-center text-sm font-mono font-medium bg-transparent outline-none m-0 p-0 text-gray-800 cursor-ns-resize min-w-[1.5rem] leading-none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  height: 16px;
+}
+
+.spinnerBtn {
+  @apply text-gray-200 hover:text-blue-500 hover:bg-blue-50 w-full flex items-center justify-center rounded cursor-pointer transition-colors leading-none;
+  height: 10px;
+}
+
+.separator {
+  @apply text-gray-300 font-bold text-sm px-0.5 select-none flex-shrink-0;
+}
+
+.resetBtnPill {
+  @apply flex items-center justify-center w-8 h-full text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0 border-l border-gray-100;
+}
+
+.resetIcon {
+  @apply transition-transform duration-300 active:rotate-[-180deg];
+}
+
+.disabledContainer {
+  @apply opacity-60 pointer-events-none;
+}
+
+.disabledContainer .inputBox {
+  @apply bg-gray-50 border-gray-200;
+}
+
+.disabledContainer .label {
+  @apply text-gray-400;
+}
+
+.disabledContainer .segmentInput {
+  @apply text-gray-400;
+}
+
+.disabledContainer .spinnerBtn {
+  @apply text-gray-100;
+}
+
+.resetBtnDisabled {
+  @apply hover:bg-transparent hover:text-gray-300 cursor-not-allowed;
+}

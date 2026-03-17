@@ -1,0 +1,91 @@
+@reference "tailwindcss";
+
+.container {
+  @apply w-full lg:min-w-[450px] lg:max-w-[550px] lg:w-auto shrink-0 bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit;
+}
+
+.title {
+  @apply text-lg font-semibold mb-4 border-b pb-2;
+}
+
+.form {
+  @apply flex flex-col gap-4;
+}
+
+.fullVideoSection {
+  @apply flex items-center;
+}
+
+.checkboxLabel {
+  @apply flex items-center gap-2 cursor-pointer select-none whitespace-nowrap;
+}
+
+.checkbox {
+  @apply w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0;
+}
+
+.checkboxText {
+  @apply text-sm text-gray-600;
+}
+
+.disabled {
+  @apply opacity-60;
+}
+
+/* 768px ~ 1023px (Wide Full Width Mode) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .topRow {
+    @apply w-full;
+  }
+  .midRow {
+    @apply flex flex-row gap-6 items-center;
+  }
+  .timeSection {
+    @apply flex flex-row gap-4 shrink-0;
+  }
+  .fullVideoSection {
+    @apply flex-1;
+  }
+
+  .bottomRow {
+    @apply flex flex-row gap-4 items-end;
+  }
+  .folderSection {
+    @apply flex-1;
+  }
+  .submitSection {
+    @apply shrink-0 min-w-[140px];
+  }
+  .submitButton {
+    @apply h-[38px]; /* Match input height */
+  }
+}
+
+/* Default / Mobile / Sidebar (LG+) Mode */
+@media (max-width: 767px), (min-width: 1024px) {
+  .topRow,
+  .midRow,
+  .bottomRow {
+    @apply flex flex-col gap-4;
+  }
+  .timeSection {
+    @apply grid grid-cols-2 gap-4;
+  }
+}
+
+.folderLabel {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.folderInputGroup {
+  @apply flex space-x-2;
+}
+
+.folderInput {
+  @apply flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-600 truncate;
+  height: 38px;
+}
+
+.submitButton {
+  @apply w-full flex items-center justify-center;
+}
