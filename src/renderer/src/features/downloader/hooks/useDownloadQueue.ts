@@ -58,6 +58,31 @@ export const useDownloadQueue = (): {
       return false
     }
 
+    // 중복 확인 (논리적으로 같은 작업인 경우)
+    const almostDuplicate = queue.find((item) => {
+      const sameUrl = item.url === url
+      const sameMode = item.isFullVideo === isFullVideo
+      if (!sameUrl || !sameMode) return false
+
+      if (isFullVideo) return true
+      return item.startStr === startStr && item.endStr === endStr
+    })
+
+    if (almostDuplicate) {
+      if (almostDuplicate.savePath === savePath) {
+        alert(`이미 동일한 작업이 등록되어 있습니다. (상태: ${almostDuplicate.status})`)
+        return false
+      } else {
+        if (
+          !confirm(
+            `이미 다른 폴더에 동일한 작업이 등록되어 있습니다. (상태: ${almostDuplicate.status})\n경로: ${almostDuplicate.savePath}\n\n현재 폴더에도 추가로 등록하시겠습니까?`
+          )
+        ) {
+          return false
+        }
+      }
+    }
+
     const command = isFullVideo
       ? `yt-dlp -P "${savePath}" "${url}"`
       : `yt-dlp --download-sections "*${startStr}-${endStr}" -P "${savePath}" "${url}"`
@@ -77,7 +102,7 @@ export const useDownloadQueue = (): {
       showCommand: false
     }
 
-    setQueue((prev) => [...prev, newItem])
+    setQueue((prev) => [newItem, ...prev])
     return true
   }
 

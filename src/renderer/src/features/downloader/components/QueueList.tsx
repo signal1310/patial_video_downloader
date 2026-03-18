@@ -39,12 +39,20 @@ export const QueueList: React.FC<QueueListProps> = ({
         </h2>
         <div className={styles.bulkActions}>
           {hasError && (
-            <button className={styles.bulkBtn} onClick={onRetryFailed} title="오류 일괄 재시작">
-              오류 재시작
+            <button
+              className={styles.bulkBtn}
+              onClick={onRetryFailed}
+              title="중단, 또는 오류로 인해 미완료된 항목들을 일괄 재시작합니다."
+            >
+              미완료 재시작
             </button>
           )}
           {hasCompleted && (
-            <button className={styles.bulkBtn} onClick={onClearCompleted} title="완료 항목 삭제">
+            <button
+              className={styles.bulkBtn}
+              onClick={onClearCompleted}
+              title="완료된 항목들을 일괄 삭제합니다."
+            >
               완료 삭제
             </button>
           )}
@@ -52,9 +60,9 @@ export const QueueList: React.FC<QueueListProps> = ({
             <button
               className={`${styles.bulkBtn} ${styles.danger}`}
               onClick={onClearAll}
-              title="전체 목록 삭제"
+              title="작업 목록을 초기화합니다."
             >
-              전체 초기화
+              초기화
             </button>
           )}
         </div>

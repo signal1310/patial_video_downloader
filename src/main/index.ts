@@ -43,7 +43,7 @@ function createWindow(): void {
     if (hasActiveProcesses()) {
       const choice = dialog.showMessageBoxSync(mainWindow, {
         type: 'question',
-        buttons: ['확인', '취소'],
+        buttons: ['종료', '취소'],
         defaultId: 1,
         title: '다운로드 중',
         message: '현재 다운로드 중인 작업이 있습니다. 정말 종료하시겠습니까?',
