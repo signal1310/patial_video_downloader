@@ -18,7 +18,8 @@ export default function App(): React.JSX.Element {
 
   // When user clicks 'edit', populate the download form with existing values
   const [editValues, setEditValues] = useState<
-    { url: string; startStr: string; endStr: string; savePath: string; isFullVideo?: boolean } | undefined
+    | { url: string; startStr: string; endStr: string; savePath: string; isFullVideo?: boolean }
+    | undefined
   >(undefined)
   const [formKey, setFormKey] = useState(0)
 
