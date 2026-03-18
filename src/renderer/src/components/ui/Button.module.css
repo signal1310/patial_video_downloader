@@ -9,11 +9,24 @@
 }
 
 .secondary {
-  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500 border border-gray-300;
+  @apply text-sm font-medium rounded-lg transition-colors border;
+  color: var(--theme-text-secondary);
+  background: var(--theme-bulk-btn-bg);
+  border-color: var(--theme-input-border);
+}
+.secondary:hover {
+  background: var(--theme-bulk-btn-bg-hover);
 }
 
 .danger {
-  @apply bg-white text-red-600 hover:bg-red-50 focus:ring-red-500 border border-red-200;
+  @apply text-red-600 hover:bg-red-50 focus:ring-red-500 border border-red-200;
+  background: var(--theme-card-bg);
+}
+[data-theme="dark"] .danger {
+  border-color: rgba(127, 29, 29, 0.4);
+}
+[data-theme="dark"] .danger:hover {
+  background: rgba(127, 29, 29, 0.2);
 }
 
 .sm {

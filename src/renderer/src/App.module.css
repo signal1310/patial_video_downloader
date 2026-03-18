@@ -1,7 +1,10 @@
 @reference "tailwindcss";
 
 .container {
-  @apply min-h-screen bg-gray-50 p-6 font-sans text-gray-800 w-full overflow-x-hidden relative;
+  @apply min-h-screen p-6 font-sans w-full overflow-x-hidden relative;
+  background: var(--theme-bg);
+  color: var(--theme-text-primary);
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .contentWrapper {
@@ -9,15 +12,24 @@
 }
 
 .header {
-  @apply bg-white p-6 rounded-xl shadow-sm border border-gray-200;
+  @apply p-6 rounded-xl;
+  background: var(--theme-card-bg);
+  border: 1px solid var(--theme-card-border);
+  box-shadow: var(--theme-card-shadow);
+}
+
+.headerTop {
+  @apply flex items-center justify-between mb-2;
 }
 
 .title {
-  @apply text-2xl font-bold text-gray-900 mb-2;
+  @apply text-2xl font-bold;
+  color: var(--theme-text-primary);
 }
 
 .subtitle {
-  @apply text-sm text-gray-500;
+  @apply text-sm;
+  color: var(--theme-text-muted);
 }
 
 .mainLayout {

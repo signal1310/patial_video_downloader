@@ -21,14 +21,92 @@
   --ev-button-alt-hover-border: transparent;
   --ev-button-alt-hover-text: var(--ev-c-text-1);
   --ev-button-alt-hover-bg: var(--ev-c-gray-2);
+
+  /* Default (Light) Scrollbar Tokens */
+  --theme-scrollbar-track: #f1f1f1;
+  --theme-scrollbar-thumb: #c1c1c1;
+  --theme-scrollbar-thumb-hover: #a8a8a8;
 }
 
-:root {
+/* ─── Theme: Light (default) ─────────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
   --color-background: var(--ev-c-black);
   --color-background-soft: var(--ev-c-black-soft);
   --color-background-mute: var(--ev-c-black-mute);
-
   --color-text: var(--ev-c-text-1);
+
+  /* App-level color tokens – light mode */
+  --theme-bg: #f9fafb;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #e5e7eb;
+  --theme-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --theme-text-primary: #111827;
+  --theme-text-secondary: #4b5563;
+  --theme-text-muted: #9ca3af;
+  --theme-text-label: #374151;
+  --theme-input-bg: #ffffff;
+  --theme-input-border: #d1d5db;
+  --theme-input-bg-readonly: #f9fafb;
+  --theme-input-text-readonly: #6b7280;
+  --theme-badge-bg: #eff6ff;
+  --theme-badge-text: #1d4ed8;
+  --theme-empty-bg: #f9fafb;
+  --theme-empty-border: #d1d5db;
+  --theme-spinner-btn-color: #e5e7eb;
+  --theme-separator-color: #e5e7eb;
+  --theme-reset-btn-color: #d1d5db;
+  --theme-reset-btn-bg-hover: #fee2e2;
+  --theme-icon-btn-hover-bg: #f3f4f6;
+  --theme-icon-btn-hover-color: #374151;
+  --theme-bulk-btn-bg: #f3f4f6;
+  --theme-bulk-btn-bg-hover: #e5e7eb;
+  --theme-logs-bg: #000000;
+  --theme-logs-text: #d1d5db;
+  --theme-cmd-bg: #1f2937;
+  --theme-cmd-text: #4ade80;
+
+  color-scheme: light;
+}
+
+/* ─── Theme: Dark (VS Code style) ────────────────────────────────────────── */
+[data-theme="dark"] {
+  /* VS Code dark palette — charcoal/gray, no blue tint */
+  --theme-bg: #1e1e1e;
+  --theme-card-bg: #252526;
+  --theme-card-border: #3e3e42;
+  --theme-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --theme-text-primary: #d4d4d4;
+  --theme-text-secondary: #9d9d9d;
+  --theme-text-muted: #6e6e6e;
+  --theme-text-label: #bbbbbb;
+  --theme-input-bg: #3c3c3c;
+  --theme-input-border: #3e3e42;
+  --theme-input-bg-readonly: #2d2d2d;
+  --theme-input-text-readonly: #8c8c8c;
+  --theme-badge-bg: #264f78;
+  --theme-badge-text: #9cdcfe;
+  --theme-empty-bg: #2d2d2d;
+  --theme-empty-border: #3e3e42;
+  --theme-spinner-btn-color: #4a4a4a;
+  --theme-separator-color: #3e3e42;
+  --theme-reset-btn-color: #5a5a5a;
+  --theme-reset-btn-bg-hover: #3a1515;
+  --theme-icon-btn-hover-bg: #3e3e42;
+  --theme-icon-btn-hover-color: #d4d4d4;
+  --theme-bulk-btn-bg: #2d2d2d;
+  --theme-bulk-btn-bg-hover: #3e3e42;
+  --theme-logs-bg: #1a1a1a;
+  --theme-logs-text: #9d9d9d;
+  --theme-cmd-bg: #1e1e1e;
+  --theme-cmd-text: #4ec9b0;
+
+  /* Scrollbar overrides for dark theme */
+  --theme-scrollbar-track: #1e1e1e;
+  --theme-scrollbar-thumb: #424242;
+  --theme-scrollbar-thumb-hover: #555555;
+
+  color-scheme: dark;
 }
 
 *,
@@ -36,6 +114,7 @@
 *::after {
   box-sizing: border-box;
   margin: 0;
+  padding: 0;
   font-weight: normal;
 }
 
@@ -64,4 +143,37 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+/* ─── Custom Scrollbars (Webkit / Chromium / Electron) ────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px; /* Reverted to 8px as per user feedback */
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-scrollbar-thumb);
+  border-radius: 4px;
+  border: 2px solid var(--theme-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--theme-scrollbar-track);
+}
+
+/* Firefox scrollbar supports natively through color-scheme and these properties */
+* {
+  scrollbar-width: auto; /* Revert to default width for Firefox to avoid "thin" being too small */
+  scrollbar-color: var(--theme-scrollbar-thumb) var(--theme-scrollbar-track);
 }

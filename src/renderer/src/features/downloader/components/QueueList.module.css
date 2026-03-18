@@ -1,36 +1,49 @@
 @reference "tailwindcss";
 
 .container {
-  @apply flex-1 w-full bg-white p-6 rounded-xl shadow-sm border border-gray-200;
+  @apply flex-1 w-full p-6 rounded-xl;
+  background: var(--theme-card-bg);
+  border: 1px solid var(--theme-card-border);
+  box-shadow: var(--theme-card-shadow);
   min-width: 0;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .header {
   @apply flex justify-between items-center mb-4 border-b pb-2;
+  border-color: var(--theme-card-border);
 }
 
 .title {
   @apply text-lg font-semibold text-gray-900;
+  color: var(--theme-text-primary);
 }
 
 .badge {
-  @apply text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-sm ml-2;
+  @apply px-2 py-0.5 rounded-full text-sm ml-2;
+  background: var(--theme-badge-bg);
+  color: var(--theme-badge-text);
 }
 
 .emptyState {
-  @apply text-center py-16 bg-gray-50 rounded-lg border border-dashed border-gray-300;
+  @apply text-center py-16 rounded-lg border border-dashed;
+  background: var(--theme-empty-bg);
+  border-color: var(--theme-empty-border);
 }
 
 .emptyIcon {
-  @apply mx-auto h-12 w-12 text-gray-400;
+  @apply mx-auto h-12 w-12;
+  color: var(--theme-text-muted);
 }
 
 .emptyTitle {
-  @apply mt-4 text-sm text-gray-500 font-medium;
+  @apply mt-4 text-sm font-medium;
+  color: var(--theme-text-muted);
 }
 
 .emptySubtitle {
-  @apply mt-1 text-xs text-gray-400;
+  @apply mt-1 text-xs;
+  color: var(--theme-text-muted);
 }
 
 .list {
@@ -42,13 +55,19 @@
 }
 
 .bulkBtn {
-  @apply px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 rounded transition-colors;
+  @apply px-2 py-1 text-xs font-medium rounded transition-colors;
+  color: var(--theme-text-secondary);
+  background: var(--theme-bulk-btn-bg);
 }
 
 .bulkBtn:hover:not(.danger) {
-  @apply text-blue-600;
+  background: var(--theme-bulk-btn-bg-hover);
+  color: #2563eb;
 }
 
 .danger {
-  @apply hover:bg-red-50 hover:text-red-600;
+  @apply hover:text-red-600;
+}
+.danger:hover {
+  background: var(--theme-reset-btn-bg-hover);
 }

@@ -11,7 +11,8 @@
 }
 
 .label {
-  @apply block text-sm font-medium text-gray-700;
+  @apply block text-sm font-medium;
+  color: var(--theme-text-label);
 }
 
 @media (min-width: 768px) {
@@ -21,7 +22,9 @@
 }
 
 .inputBox {
-  @apply flex items-center bg-white border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all select-none;
+  @apply flex items-center rounded-lg focus-within:ring-2 focus-within:ring-blue-500 transition-all select-none;
+  background: var(--theme-input-bg);
+  border: 1px solid var(--theme-input-border);
   box-shadow: none !important;
   height: 38px;
   width: 100%;
@@ -44,23 +47,36 @@
 }
 
 .segmentInput {
-  @apply w-7 text-center text-sm font-mono font-medium bg-transparent outline-none m-0 p-0 text-gray-800 cursor-ns-resize min-w-[1.5rem] leading-none;
+  @apply w-7 text-center text-sm font-mono font-medium bg-transparent outline-none m-0 p-0 cursor-ns-resize min-w-[1.5rem] leading-none;
   -moz-appearance: textfield;
   appearance: textfield;
   height: 16px;
+  color: var(--theme-text-primary);
 }
 
 .spinnerBtn {
-  @apply text-gray-200 hover:text-blue-500 hover:bg-blue-50 w-full flex items-center justify-center rounded cursor-pointer transition-colors leading-none;
+  @apply w-full flex items-center justify-center rounded cursor-pointer transition-colors leading-none;
+  color: var(--theme-spinner-btn-color);
   height: 10px;
+}
+.spinnerBtn:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
 }
 
 .separator {
-  @apply text-gray-300 font-bold text-sm px-0.5 select-none flex-shrink-0;
+  @apply text-sm px-0.5 select-none flex-shrink-0 font-bold;
+  color: var(--theme-separator-color);
 }
 
 .resetBtnPill {
-  @apply flex items-center justify-center w-8 h-full text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0 border-l border-gray-100;
+  @apply flex items-center justify-center w-8 h-full transition-all flex-shrink-0;
+  color: var(--theme-reset-btn-color);
+  border-left: 1px solid var(--theme-separator-color);
+}
+.resetBtnPill:hover {
+  color: #ef4444;
+  background: var(--theme-reset-btn-bg-hover);
 }
 
 .resetIcon {
@@ -72,21 +88,26 @@
 }
 
 .disabledContainer .inputBox {
-  @apply bg-gray-50 border-gray-200;
+  background: var(--theme-input-bg-readonly);
+  border-color: var(--theme-input-border);
 }
 
 .disabledContainer .label {
-  @apply text-gray-400;
+  color: var(--theme-text-muted);
 }
 
 .disabledContainer .segmentInput {
-  @apply text-gray-400;
+  color: var(--theme-text-muted);
 }
 
 .disabledContainer .spinnerBtn {
-  @apply text-gray-100;
+  color: var(--theme-spinner-btn-color);
 }
 
 .resetBtnDisabled {
-  @apply hover:bg-transparent hover:text-gray-300 cursor-not-allowed;
+  cursor: not-allowed;
+}
+.resetBtnDisabled:hover {
+  background: transparent;
+  color: var(--theme-reset-btn-color);
 }
