@@ -9,6 +9,15 @@
 /dist
 /out
 /release
+/electron-builder-cache
+*.asar
+
+# Cache and logs
+.vite
+.tsbuildinfo
+.eslintcache
+ts_web_errors.txt
+*.log
 
 # Platform-specific files (optional, as needed)
 # macOS
@@ -16,5 +25,12 @@
 # OS generated temp files
 .idea
 .vscode
-*.log*
-.eslintcache
+/.vscode
+Thumbs.db
+desktop.ini
+
+# Environment and local config
+.env
+.env.*.local
+.npmrc
+dev-app-update.yml

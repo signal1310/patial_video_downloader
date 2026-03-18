@@ -14,8 +14,9 @@ function createWindow(): void {
     minHeight: 480,
     maxWidth: 1280,
     show: false,
+    title: 'Partial Video Downloader',
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
