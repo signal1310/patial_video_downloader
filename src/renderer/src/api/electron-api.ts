@@ -51,6 +51,7 @@ export const onYtdlpUpdate = (
   }
   return null
 }
+
 export const requestCancelYtdlp = (id: string): void => {
   const customWindow = window as unknown as CustomWindow
   if (customWindow.api?.cancelYtdlp) {

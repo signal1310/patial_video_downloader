@@ -24,13 +24,43 @@ interface DownloadFormProps {
   initialValues?: FormValues
 }
 
+const FORM_STORAGE_KEY = 'patial_video_downloader_form_state'
+
 export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues }) => {
   const formRef = useRef<HTMLFormElement>(null)
-  const [url, setUrl] = useState(initialValues?.url ?? '')
-  const [savePath, setSavePath] = useState(initialValues?.savePath ?? 'C:/Downloads/Videos')
-  const [startStr, setStartStr] = useState(initialValues?.startStr ?? '00:00:00')
-  const [endStr, setEndStr] = useState(initialValues?.endStr ?? '00:00:00')
-  const [isFullVideo, setIsFullVideo] = useState(initialValues?.isFullVideo ?? false)
+
+  const [values, setValues] = useState<FormValues>(() => {
+    const defaults: FormValues = {
+      url: '',
+      savePath: '',
+      startStr: '00:00:00',
+      endStr: '00:00:00',
+      isFullVideo: false
+    }
+
+    let saved = {}
+    try {
+      const str = localStorage.getItem(FORM_STORAGE_KEY)
+      if (str) saved = JSON.parse(str)
+    } catch {
+      /* ignore */
+    }
+
+    return { ...defaults, ...saved, ...initialValues }
+  })
+
+  // Destructure for convenience in the render and effects
+  const { url, savePath, startStr, endStr, isFullVideo } = values
+
+  // Update specific field
+  const updateField = <K extends keyof FormValues>(field: K, value: FormValues[K]): void => {
+    setValues((prev) => ({ ...prev, [field]: value }))
+  }
+
+  // Save to localStorage on change
+  useEffect(() => {
+    localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(values))
+  }, [values])
 
   useEffect(() => {
     const handlePaste = (e: globalThis.ClipboardEvent): void => {
@@ -40,21 +70,15 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
       const activeEl = document.activeElement as HTMLElement
       const isInput = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA'
 
-      // 만약 텍스트가 시간(예: 00:00)같이 짧은 문자열이고, 인풋에 포커스가 있다면
-      // 기본 붙여넣기 동작을 허용합니다 (URL을 덮어쓰지 않음).
-      // 하지만 URL 형태이거나 포커스가 아예 없다면 무조건 영상 URL 필드에 붙여넣습니다.
       if (!isInput || text.startsWith('http') || text.startsWith('www')) {
         e.preventDefault()
-        setUrl(text.trim())
+        updateField('url', text.trim())
       }
     }
 
     const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
       if (e.key === 'Enter') {
         const activeEl = document.activeElement
-        // 사용자가 탭(Tab) 키 등으로 특정 인풋, 체크박스, 버튼에 포커스를 둔 상태라면
-        // 해당 요소의 기본 동작(클릭 등)을 허용하도록 가만히 둡니다.
-        // 아무것도 포커스되어 있지 않은 허공(body)일 때만 다운로드 시작(submit)을 강제합니다.
         if (!activeEl || activeEl === document.body || activeEl === document.documentElement) {
           e.preventDefault()
           formRef.current?.requestSubmit()
@@ -73,42 +97,37 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
 
   useEffect(() => {
     const fetchDefaultPath = async (): Promise<void> => {
-      // Only fetch if initialValues didn't provide a path
-      if (!initialValues?.savePath) {
+      // Only fetch if we don't have a path from initialValues OR localStorage
+      if (!values.savePath) {
         const defaultPath = await requestDefaultDownloadPath()
         if (defaultPath) {
-          setSavePath(defaultPath)
+          updateField('savePath', defaultPath)
         }
       }
     }
     fetchDefaultPath()
-  }, [initialValues])
+  }, [initialValues, values.savePath])
 
   const handleSelectFolder = async (): Promise<void> => {
     const selectedPath = await requestSelectFolder()
     if (selectedPath) {
-      setSavePath(selectedPath)
-    }
-  }
-  const handleTimeChange = (type: 'start' | 'end', value: string): void => {
-    if (type === 'start') {
-      setStartStr(value)
-    } else {
-      setEndStr(value)
+      updateField('savePath', selectedPath)
     }
   }
 
   const handleReset = async (): Promise<void> => {
-    setUrl('')
-    if (!isFullVideo) {
-      setStartStr('00:00:00')
-      setEndStr('00:00:00')
-    }
+    setValues((prev) => ({
+      ...prev,
+      url: '',
+      startStr: prev.isFullVideo ? prev.startStr : '00:00:00',
+      endStr: prev.isFullVideo ? prev.endStr : '00:00:00'
+    }))
+    localStorage.removeItem(FORM_STORAGE_KEY)
   }
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
-    const success = onAdd(url, startStr, endStr, savePath, isFullVideo)
+    const success = onAdd(url, startStr, endStr, savePath, isFullVideo || false)
     if (success) {
       await handleReset()
     }
@@ -124,7 +143,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
               label="영상 URL"
               type="text"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => updateField('url', e.target.value)}
               placeholder="https://www.youtube.com/watch?v=..."
               required
             />
@@ -136,13 +155,13 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
             <TimePicker
               label="시작 시간"
               value={startStr}
-              onChange={(val) => handleTimeChange('start', val)}
+              onChange={(val) => updateField('startStr', val)}
               disabled={isFullVideo}
             />
             <TimePicker
               label="종료 시간"
               value={endStr}
-              onChange={(val) => handleTimeChange('end', val)}
+              onChange={(val) => updateField('endStr', val)}
               disabled={isFullVideo}
             />
           </div>
@@ -152,7 +171,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
               <input
                 type="checkbox"
                 checked={isFullVideo}
-                onChange={(e) => setIsFullVideo(e.target.checked)}
+                onChange={(e) => updateField('isFullVideo', e.target.checked)}
                 className={styles.checkbox}
               />
               <span className={styles.checkboxText}>영상 전 구간 다운로드</span>
