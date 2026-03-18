@@ -3,10 +3,10 @@ import styles from './QueueItemCard.module.css'
 import { QueueItem } from '../../../types'
 
 // ── SVG Icons ────────────────────────────────────────────────────────────────
-const IconLogs = (): React.JSX.Element => (
+const IconLogs = ({ size = 14 }: { size?: number }): React.JSX.Element => (
   <svg
-    width="14"
-    height="14"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -23,10 +23,10 @@ const IconLogs = (): React.JSX.Element => (
   </svg>
 )
 
-const IconTerminal = (): React.JSX.Element => (
+const IconTerminal = ({ size = 14 }: { size?: number }): React.JSX.Element => (
   <svg
-    width="14"
-    height="14"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -40,10 +40,10 @@ const IconTerminal = (): React.JSX.Element => (
   </svg>
 )
 
-const IconRetry = (): React.JSX.Element => (
+const IconRetry = ({ size = 13 }: { size?: number }): React.JSX.Element => (
   <svg
-    width="13"
-    height="13"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -57,10 +57,10 @@ const IconRetry = (): React.JSX.Element => (
   </svg>
 )
 
-const IconEdit = (): React.JSX.Element => (
+const IconEdit = ({ size = 13 }: { size?: number }): React.JSX.Element => (
   <svg
-    width="13"
-    height="13"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -88,6 +88,22 @@ const IconX = ({ size = 14 }: { size?: number }): React.JSX.Element => (
   >
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
+const IconFolder = ({ size = 12 }: { size?: number }): React.JSX.Element => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ shapeRendering: 'geometricPrecision', display: 'block' }}
+  >
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
   </svg>
 )
 
@@ -125,8 +141,17 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
             ? styles.statusCancelled
             : styles.statusDefault
 
+  const handleCopyUrl = (e: React.MouseEvent): void => {
+    e.stopPropagation()
+    navigator.clipboard.writeText(item.url)
+  }
+
+  const handleCardClick = (): void => {
+    onToggleLogs(item.id)
+  }
+
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${styles.clickableCard}`} onClick={handleCardClick}>
       {/* Progress fill */}
       {isDownloading && (
         <div className={styles.progressBackground} style={{ width: `${item.progress}%` }} />
@@ -142,30 +167,27 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               <span className={styles.progressText}>{item.progress.toFixed(1)}%</span>
             )}
           </div>
-          <p className={styles.urlText} title={item.url}>
+          <p className={styles.urlText} title="클릭하여 복사" onClick={handleCopyUrl}>
             {item.url}
           </p>
-          <span className={styles.timeRange}>
-            {item.isFullVideo ? '전체 영상' : `구간 ${item.startStr} ~ ${item.endStr}`}
-          </span>
         </div>
 
         {/* Right: icon buttons */}
-        <div className={styles.actions}>
+        <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
           {/* Secondary actions: terminal / logs (always visible) */}
           <button
             className={`${styles.iconBtn} ${item.showCommand ? styles.iconBtnActive : ''}`}
             onClick={() => onToggleCommand(item.id)}
             title="명령어"
           >
-            <IconTerminal />
+            <IconTerminal size={16} />
           </button>
           <button
             className={`${styles.iconBtn} ${item.showLogs ? styles.iconBtnActive : ''}`}
             onClick={() => onToggleLogs(item.id)}
             title="로그"
           >
-            <IconLogs />
+            <IconLogs size={16} />
             {item.logs.length > 0 && <span className={styles.logBadge}>{item.logs.length}</span>}
           </button>
 
@@ -174,10 +196,10 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
             <>
               <span className={styles.sep} />
               <button className={styles.iconBtn} onClick={() => onRetry(item.id)} title="재시작">
-                <IconRetry />
+                <IconRetry size={15} />
               </button>
               <button className={styles.iconBtn} onClick={() => onEdit(item)} title="편집">
-                <IconEdit />
+                <IconEdit size={15} />
               </button>
               <span className={styles.sep} />
             </>
@@ -190,7 +212,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               onClick={() => onCancel(item.id)}
               title="취소"
             >
-              <IconX />
+              <IconX size={16} />
             </button>
           )}
           {isFinished && (
@@ -199,15 +221,25 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               onClick={() => onRemove(item.id)}
               title="삭제"
             >
-              <IconX />
+              <IconX size={16} />
             </button>
           )}
         </div>
       </div>
 
+      <div className={styles.metaRow}>
+        <span className={styles.timeRange}>
+          {item.isFullVideo ? '전체 영상' : `구간 ${item.startStr} ~ ${item.endStr}`}
+        </span>
+        <span className={styles.savePath} title={item.savePath}>
+          <IconFolder />
+          {item.savePath}
+        </span>
+      </div>
+
       {/* ── Expandable details ── */}
       {(item.showCommand || item.showLogs) && (
-        <div className={styles.details}>
+        <div className={styles.details} onClick={(e) => e.stopPropagation()}>
           {item.showCommand && <div className={styles.commandBox}>{item.command}</div>}
           {item.showLogs && (
             <div className={styles.logsBox}>
@@ -222,9 +254,8 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                   item.logs.map((log, i) => (
                     <div
                       key={i}
-                      className={`${styles.logLine} ${
-                        log.includes('warning') || log.includes('WARNING') ? styles.logWarning : ''
-                      } ${log.includes('error') || log.includes('ERROR') ? styles.logError : ''}`}
+                      className={`${styles.logLine} ${log.includes('warning') || log.includes('WARNING') ? styles.logWarning : ''
+                        } ${log.includes('error') || log.includes('ERROR') ? styles.logError : ''}`}
                     >
                       {log}
                     </div>
