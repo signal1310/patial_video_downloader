@@ -1,7 +1,7 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { setupDialogHandlers } from './ipc/dialogHandlers'
-import { setupYtdlpHandlers } from './ipc/ytdlpHandlers'
+import { setupYtdlpHandlers, cleanupAllProcesses, hasActiveProcesses } from './ipc/ytdlpHandlers'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
@@ -38,6 +38,23 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  mainWindow.on('close', (e) => {
+    if (hasActiveProcesses()) {
+      const choice = dialog.showMessageBoxSync(mainWindow, {
+        type: 'question',
+        buttons: ['종료', '취소'],
+        defaultId: 1,
+        title: '다운로드 중',
+        message: '현재 다운로드 중인 작업이 있습니다. 정말 종료하시겠습니까?',
+        detail: '종료 시 진행 중인 모든 다운로드 작업이 취소됩니다.'
+      })
+
+      if (choice === 1) {
+        e.preventDefault()
+      }
+    }
+  })
 }
 
 // This method will be called when Electron has finished
@@ -67,6 +84,11 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('before-quit', () => {
+  console.log('[Main] App before-quit, cleaning up processes...')
+  cleanupAllProcesses()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

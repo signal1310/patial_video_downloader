@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { QueueItem } from '../../../types'
 import { requestRunYtdlp, onYtdlpUpdate, requestCancelYtdlp } from '../../../api/electron-api'
 
@@ -24,9 +24,9 @@ export const useDownloadQueue = (): {
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as QueueItem[]
-        // 앱 재시작 시 '다운로드 중' 이었던 항목은 '대기 중'으로 변경하여 다시 시작할 수 있게 함
+        // 앱 재시작 시 '다운로드 중' 이었던 항목은 '취소됨'으로 변경
         return parsed.map((item) =>
-          item.status === '다운로드 중' ? { ...item, status: '대기 중' } : item
+          item.status === '다운로드 중' ? { ...item, status: '취소됨' as const } : item
         )
       } catch (e) {
         console.error('Failed to parse saved queue', e)
@@ -35,6 +35,8 @@ export const useDownloadQueue = (): {
     }
     return []
   })
+
+  const listenersRef = useRef(new Map<string, () => void>())
 
   // 큐 데이터가 변경될 때마다 localStorage에 저장
   useEffect(() => {
@@ -78,6 +80,11 @@ export const useDownloadQueue = (): {
 
   const removeFromQueue = (id: string): void => {
     setQueue((prev) => prev.filter((item) => item.id !== id))
+    const cleanup = listenersRef.current.get(id)
+    if (cleanup) {
+      cleanup()
+      listenersRef.current.delete(id)
+    }
   }
 
   const toggleLogs = (id: string): void => {
@@ -98,6 +105,11 @@ export const useDownloadQueue = (): {
     setQueue((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: '취소됨' as const } : item))
     )
+    const cleanup = listenersRef.current.get(id)
+    if (cleanup) {
+      cleanup()
+      listenersRef.current.delete(id)
+    }
   }
 
   const hasPendingItems = queue.some((i) => i.status === '대기 중')
@@ -127,6 +139,13 @@ export const useDownloadQueue = (): {
         const removeListener = onYtdlpUpdate(
           itemToProcess.id,
           (data: { type: string; text?: string; percent?: number; code?: number }) => {
+            if (data.type === 'done') {
+              const cleanup = listenersRef.current.get(itemToProcess.id)
+              if (cleanup) {
+                cleanup()
+                listenersRef.current.delete(itemToProcess.id)
+              }
+            }
             setQueue((prev) => {
               const idx = prev.findIndex((q) => q.id === itemToProcess.id)
               if (idx === -1) return prev
@@ -169,11 +188,12 @@ export const useDownloadQueue = (): {
               return newQueue
             })
 
-            if (data.type === 'done' && removeListener) {
-              removeListener()
-            }
           }
         )
+
+        if (removeListener) {
+          listenersRef.current.set(itemToProcess.id, removeListener)
+        }
 
         requestRunYtdlp({
           id: itemToProcess.id,

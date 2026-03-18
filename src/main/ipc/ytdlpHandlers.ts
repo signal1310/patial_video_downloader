@@ -1,8 +1,9 @@
 import { ipcMain } from 'electron'
-import { spawn, ChildProcess, exec } from 'child_process'
+import { spawn, ChildProcess, exec, execSync } from 'child_process'
 
 const activeProcesses = new Map<string, { proc: ChildProcess; pid: number; savePath: string }>()
 const cancelledIds = new Set<string>()
+let isQuitting = false
 
 export function setupYtdlpHandlers(): void {
   ipcMain.on('ytdlp:run', (event, req) => {
@@ -35,6 +36,7 @@ export function setupYtdlpHandlers(): void {
     if (targetDurationSeconds <= 0) targetDurationSeconds = 1
 
     const processOutput = (data: unknown): void => {
+      if (isQuitting || event.sender.isDestroyed()) return
       const text = String(data)
 
       // Emit raw chunks so frontend handles \r logic
@@ -76,22 +78,28 @@ export function setupYtdlpHandlers(): void {
 
     ytDlpProcess.on('close', (code) => {
       activeProcesses.delete(id)
+      if (isQuitting) return
       // Skip if this was cancelled - renderer already set status to '취소됨'
       if (cancelledIds.has(id)) {
         cancelledIds.delete(id)
         return
       }
-      event.sender.send(`ytdlp:update:${id}`, { type: 'done', code })
+      if (!event.sender.isDestroyed()) {
+        event.sender.send(`ytdlp:update:${id}`, { type: 'done', code })
+      }
     })
 
     ytDlpProcess.on('error', (err) => {
       activeProcesses.delete(id)
+      if (isQuitting) return
       // Skip if this was cancelled - renderer already set status to '취소됨'
       if (cancelledIds.has(id)) {
         cancelledIds.delete(id)
         return
       }
-      event.sender.send(`ytdlp:update:${id}`, { type: 'error', text: err.message })
+      if (!event.sender.isDestroyed()) {
+        event.sender.send(`ytdlp:update:${id}`, { type: 'error', text: err.message })
+      }
     })
   })
 
@@ -144,4 +152,21 @@ export function setupYtdlpHandlers(): void {
       console.warn(`[Main] No active process for ID: ${id} to cancel.`)
     }
   })
+}
+
+export function cleanupAllProcesses(): void {
+  isQuitting = true
+  for (const [id, item] of activeProcesses.entries()) {
+    try {
+      console.log(`[Main] App quitting, killing leftover process for ID: ${id}, PID: ${item.pid}`)
+      // Use synchronous kill to ensure they die before the app exits
+      execSync(`taskkill /F /T /PID ${item.pid}`)
+    } catch (e) {
+      console.warn(`[Main] Cleanup failed for ${id}: ${(e as Error).message}`)
+    }
+  }
+}
+
+export function hasActiveProcesses(): boolean {
+  return activeProcesses.size > 0
 }
