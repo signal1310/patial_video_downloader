@@ -58,11 +58,29 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
     }
   }
 
-  const handleSubmit = (e: React.FormEvent): void => {
+  const handleReset = async (): Promise<void> => {
+    setUrl(initialValues?.url ?? '')
+    setStartStr(initialValues?.startStr ?? '00:00:00')
+    setEndStr(initialValues?.endStr ?? '00:00:00')
+    setIsFullVideo(initialValues?.isFullVideo ?? false)
+
+    if (initialValues?.savePath) {
+      setSavePath(initialValues.savePath)
+    } else {
+      const defaultPath = await requestDefaultDownloadPath()
+      if (defaultPath) {
+        setSavePath(defaultPath)
+      } else {
+        setSavePath('C:/Downloads/Videos')
+      }
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     const success = onAdd(url, startStr, endStr, savePath, isFullVideo)
     if (success) {
-      setUrl('')
+      await handleReset()
     }
   }
 

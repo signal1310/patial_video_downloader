@@ -1,6 +1,20 @@
-node_modules
-dist
-out
+# Dependencies
+/node_modules
+
+# Testing
+/coverage
+
+# Production and Build artifacts
+/build
+/dist
+/out
+/release
+
+# Platform-specific files (optional, as needed)
+# macOS
 .DS_Store
-.eslintcache
+# OS generated temp files
+.idea
+.vscode
 *.log*
+.eslintcache
