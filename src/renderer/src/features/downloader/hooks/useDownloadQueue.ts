@@ -11,7 +11,8 @@ export const useDownloadQueue = (): {
     startStr: string,
     endStr: string,
     savePath: string,
-    isFullVideo: boolean
+    isFullVideo: boolean,
+    existingId?: string
   ) => boolean
   removeFromQueue: (id: string) => void
   toggleLogs: (id: string) => void
@@ -51,15 +52,22 @@ export const useDownloadQueue = (): {
     startStr: string,
     endStr: string,
     savePath: string,
-    isFullVideo: boolean
+    isFullVideo: boolean,
+    existingId?: string
   ): boolean => {
     if (!url) {
       alert('영상 URL을 입력해주세요.')
       return false
     }
 
-    // 중복 확인 (논리적으로 같은 작업인 경우)
-    const almostDuplicate = queue.find((item) => {
+    const command = isFullVideo
+      ? `yt-dlp -P "${savePath}" "${url}"`
+      : `yt-dlp --download-sections "*${startStr}-${endStr}" -P "${savePath}" "${url}"`
+
+    // 중복 확인 (본인 제외)
+    const otherDuplicate = queue.find((item) => {
+      if (existingId && item.id === existingId) return false
+
       const sameUrl = item.url === url
       const sameMode = item.isFullVideo === isFullVideo
       if (!sameUrl || !sameMode) return false
@@ -68,14 +76,14 @@ export const useDownloadQueue = (): {
       return item.startStr === startStr && item.endStr === endStr
     })
 
-    if (almostDuplicate) {
-      if (almostDuplicate.savePath === savePath) {
-        alert(`이미 동일한 작업이 등록되어 있습니다. (상태: ${almostDuplicate.status})`)
+    if (otherDuplicate) {
+      if (otherDuplicate.savePath === savePath) {
+        alert(`이미 동일한 작업이 등록되어 있습니다. (상태: ${otherDuplicate.status})`)
         return false
       } else {
         if (
           !confirm(
-            `이미 다른 폴더에 동일한 작업이 등록되어 있습니다. (상태: ${almostDuplicate.status})\n경로: ${almostDuplicate.savePath}\n\n현재 폴더에도 추가로 등록하시겠습니까?`
+            `이미 다른 폴더에 동일한 작업이 등록되어 있습니다. (상태: ${otherDuplicate.status})\n경로: ${otherDuplicate.savePath}\n\n현재 폴더에도 추가로 등록하시겠습니까?`
           )
         ) {
           return false
@@ -83,9 +91,43 @@ export const useDownloadQueue = (): {
       }
     }
 
-    const command = isFullVideo
-      ? `yt-dlp -P "${savePath}" "${url}"`
-      : `yt-dlp --download-sections "*${startStr}-${endStr}" -P "${savePath}" "${url}"`
+    // 수정 모드인 경우 처리
+    if (existingId) {
+      const existingItem = queue.find((item) => item.id === existingId)
+      if (existingItem) {
+        const isUnchanged =
+          existingItem.url === url &&
+          existingItem.savePath === savePath &&
+          existingItem.isFullVideo === isFullVideo &&
+          (isFullVideo || (existingItem.startStr === startStr && existingItem.endStr === endStr))
+
+        if (isUnchanged && existingItem.status === '완료') {
+          // 변경 사항이 없는데 이미 완료된 상태면 아무것도 하지 않음
+          return false
+        }
+
+        // 기존 아이템 업데이트 (상태를 '대기 중'으로 변경하여 재다운로드 유도)
+        setQueue((prev) =>
+          prev.map((item) =>
+            item.id === existingId
+              ? {
+                  ...item,
+                  url,
+                  startStr,
+                  endStr,
+                  savePath,
+                  isFullVideo,
+                  command,
+                  status: isUnchanged && existingItem.status !== '오류' ? item.status : '대기 중',
+                  progress: 0,
+                  logs: []
+                }
+              : item
+          )
+        )
+        return true
+      }
+    }
 
     const newItem: QueueItem = {
       id: Date.now().toString(),

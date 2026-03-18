@@ -6,6 +6,7 @@ import { TimePicker } from '../../../components/ui/TimePicker'
 import { requestSelectFolder, requestDefaultDownloadPath } from '../../../api/electron-api'
 
 interface FormValues {
+  id?: string
   url: string
   startStr: string
   endStr: string
@@ -19,7 +20,8 @@ interface DownloadFormProps {
     startStr: string,
     endStr: string,
     savePath: string,
-    isFullVideo: boolean
+    isFullVideo: boolean,
+    id?: string
   ) => boolean
   initialValues?: FormValues
 }
@@ -118,6 +120,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
   const handleReset = async (): Promise<void> => {
     setValues((prev) => ({
       ...prev,
+      id: undefined,
       url: '',
       startStr: prev.isFullVideo ? prev.startStr : '00:00:00',
       endStr: prev.isFullVideo ? prev.endStr : '00:00:00'
@@ -128,6 +131,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
   const handleManualReset = async (): Promise<void> => {
     setValues((prev) => ({
       ...prev,
+      id: undefined,
       url: '',
       startStr: '00:00:00',
       endStr: '00:00:00',
@@ -138,7 +142,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
-    const success = onAdd(url, startStr, endStr, savePath, isFullVideo || false)
+    const success = onAdd(url, startStr, endStr, savePath, isFullVideo || false, values.id)
     if (success) {
       await handleReset()
     }
@@ -207,7 +211,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
           </div>
           <div className={styles.submitSection}>
             <Button type="submit" className={styles.submitButton}>
-              다운로드 시작
+              {values.id ? '편집 후 다운로드 시작' : '다운로드 시작'}
             </Button>
           </div>
         </div>

@@ -21,13 +21,21 @@ export default function App(): React.JSX.Element {
 
   // When user clicks 'edit', populate the download form with existing values
   const [editValues, setEditValues] = useState<
-    | { url: string; startStr: string; endStr: string; savePath: string; isFullVideo?: boolean }
+    | {
+        id: string
+        url: string
+        startStr: string
+        endStr: string
+        savePath: string
+        isFullVideo?: boolean
+      }
     | undefined
   >(undefined)
   const [formKey, setFormKey] = useState(0)
 
   const handleEdit = (item: QueueItem): void => {
     setEditValues({
+      id: item.id,
       url: item.url,
       startStr: item.startStr,
       endStr: item.endStr,
@@ -51,7 +59,17 @@ export default function App(): React.JSX.Element {
         </header>
 
         <div className={styles.mainLayout}>
-          <DownloadForm key={formKey} onAdd={addToQueue} initialValues={editValues} />
+          <DownloadForm
+            key={formKey}
+            onAdd={(url, startStr, endStr, savePath, isFullVideo, id) => {
+              const success = addToQueue(url, startStr, endStr, savePath, isFullVideo, id)
+              if (success) {
+                setEditValues(undefined)
+              }
+              return success
+            }}
+            initialValues={editValues}
+          />
 
           <QueueList
             queue={queue}
