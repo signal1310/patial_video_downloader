@@ -27,6 +27,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0; /* Add this to allow flex children to shrink */
 }
 
 /* Left info block */
@@ -86,6 +87,7 @@
   align-items: center;
   margin-top: 6px;
   gap: 12px;
+  min-width: 0; /* Add this to allow flex children to shrink */
 }
 
 .timeRange {
@@ -94,7 +96,7 @@
 
 .savePath {
   @apply text-xs text-gray-400 truncate flex items-center gap-1 min-w-0 cursor-pointer hover:text-blue-500 hover:underline transition-colors;
-  max-width: 500px;
+  max-width: 100%; /* Change fixed width to allow full shrinkage */
 }
 
 .savePath svg {

@@ -2,6 +2,7 @@
 
 .container {
   @apply flex-1 w-full bg-white p-6 rounded-xl shadow-sm border border-gray-200;
+  min-width: 0;
 }
 
 .header {

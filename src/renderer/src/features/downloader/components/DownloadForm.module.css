@@ -48,12 +48,15 @@
   .topRow {
     @apply w-full;
   }
+
   .midRow {
     @apply flex flex-row gap-6 items-center;
   }
+
   .timeSection {
     @apply flex flex-row gap-4 shrink-0;
   }
+
   .fullVideoSection {
     @apply flex-1;
   }
@@ -61,24 +64,31 @@
   .bottomRow {
     @apply flex flex-row gap-4 items-end;
   }
+
   .folderSection {
     @apply flex-1;
   }
+
   .submitSection {
     @apply shrink-0 min-w-[140px];
   }
+
   .submitButton {
-    @apply h-[38px]; /* Match input height */
+    @apply h-[38px];
+    /* Match input height */
   }
 }
 
 /* Default / Mobile / Sidebar (LG+) Mode */
-@media (max-width: 767px), (min-width: 1024px) {
+@media (max-width: 767px),
+(min-width: 1024px) {
+
   .topRow,
   .midRow,
   .bottomRow {
     @apply flex flex-col gap-4;
   }
+
   .timeSection {
     @apply grid grid-cols-2 gap-4;
   }

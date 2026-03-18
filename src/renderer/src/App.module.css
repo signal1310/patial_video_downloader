@@ -23,3 +23,16 @@
 .mainLayout {
   @apply flex flex-col lg:flex-row gap-6 items-start w-full;
 }
+
+@media (min-width: 1024px) {
+  .mainLayout {
+    display: grid;
+    grid-template-columns: 550px 1fr;
+    align-items: start;
+    min-width: 0;
+  }
+
+  .mainLayout > * {
+    min-width: 0;
+  }
+}
