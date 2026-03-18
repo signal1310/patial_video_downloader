@@ -20,6 +20,9 @@ const api = {
   },
   cancelYtdlp: (id: string) => {
     ipcRenderer.send('ytdlp:cancel', id)
+  },
+  openPath: (path: string) => {
+    return ipcRenderer.invoke('shell:openPath', path)
   }
 }
 

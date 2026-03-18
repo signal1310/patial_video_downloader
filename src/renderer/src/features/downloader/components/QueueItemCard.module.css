@@ -90,7 +90,7 @@
 }
 
 .savePath {
-  @apply text-xs text-gray-400 truncate flex items-center gap-1 min-w-0;
+  @apply text-xs text-gray-400 truncate flex items-center gap-1 min-w-0 cursor-pointer hover:text-blue-500 hover:underline transition-colors;
   max-width: 500px;
 }
 

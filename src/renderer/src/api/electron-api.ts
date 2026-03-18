@@ -58,3 +58,11 @@ export const requestCancelYtdlp = (id: string): void => {
     customWindow.api.cancelYtdlp(id)
   }
 }
+
+export const requestOpenPath = async (path: string): Promise<string | undefined> => {
+  const customWindow = window as unknown as CustomWindow
+  if (customWindow.api?.openPath) {
+    return await customWindow.api.openPath(path)
+  }
+  return undefined
+}

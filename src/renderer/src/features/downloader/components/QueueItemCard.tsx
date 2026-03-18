@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from './QueueItemCard.module.css'
 import { QueueItem } from '../../../types'
+import { requestOpenPath } from '../../../api/electron-api'
 
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 const IconLogs = ({ size = 14 }: { size?: number }): React.JSX.Element => (
@@ -150,6 +151,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     onToggleLogs(item.id)
   }
 
+  const handleOpenFolder = (e: React.MouseEvent): void => {
+    e.stopPropagation()
+    requestOpenPath(item.savePath)
+  }
+
   return (
     <div className={`${styles.card} ${styles.clickableCard}`} onClick={handleCardClick}>
       {/* Progress fill */}
@@ -231,10 +237,10 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
         <span className={styles.timeRange}>
           {item.isFullVideo ? '전체 영상' : `구간 ${item.startStr} ~ ${item.endStr}`}
         </span>
-        <span className={styles.savePath} title={item.savePath}>
+        <div className={styles.savePath} title={item.savePath} onClick={handleOpenFolder}>
           <IconFolder />
           {item.savePath}
-        </span>
+        </div>
       </div>
 
       {/* ── Expandable details ── */}

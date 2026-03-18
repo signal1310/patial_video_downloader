@@ -23,6 +23,7 @@ export interface CustomWindow {
       callback: (data: { type: string; text?: string; percent?: number; code?: number }) => void
     ) => () => void
     cancelYtdlp: (id: string) => void
+    openPath: (path: string) => Promise<string>
   }
   showDirectoryPicker?: () => Promise<{ name: string }>
 }

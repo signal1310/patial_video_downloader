@@ -1,4 +1,4 @@
-import { ipcMain, dialog, app } from 'electron'
+import { ipcMain, dialog, app, shell } from 'electron'
 
 export function setupDialogHandlers(): void {
   ipcMain.handle('dialog:selectFolder', async () => {
@@ -14,5 +14,9 @@ export function setupDialogHandlers(): void {
 
   ipcMain.handle('dialog:getDownloadsFolder', () => {
     return app.getPath('downloads')
+  })
+
+  ipcMain.handle('shell:openPath', async (_, path: string) => {
+    return await shell.openPath(path)
   })
 }
