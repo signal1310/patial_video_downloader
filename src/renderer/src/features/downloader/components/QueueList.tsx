@@ -11,6 +11,9 @@ interface QueueListProps {
   onCancel: (id: string) => void
   onRetry: (id: string) => void
   onEdit: (item: QueueItem) => void
+  onClearAll: () => void
+  onClearCompleted: () => void
+  onRetryFailed: () => void
 }
 
 export const QueueList: React.FC<QueueListProps> = ({
@@ -20,14 +23,41 @@ export const QueueList: React.FC<QueueListProps> = ({
   onToggleCommand,
   onCancel,
   onRetry,
-  onEdit
+  onEdit,
+  onClearAll,
+  onClearCompleted,
+  onRetryFailed
 }) => {
+  const hasCompleted = queue.some((item) => item.status === '완료')
+  const hasError = queue.some((item) => item.status === '오류' || item.status === '중단됨')
+
   return (
     <section className={styles.container}>
       <div className={styles.header}>
         <h2 className={styles.title}>
           작업 목록 <span className={styles.badge}>{queue.length}</span>
         </h2>
+        <div className={styles.bulkActions}>
+          {hasError && (
+            <button className={styles.bulkBtn} onClick={onRetryFailed} title="오류 일괄 재시작">
+              오류 재시작
+            </button>
+          )}
+          {hasCompleted && (
+            <button className={styles.bulkBtn} onClick={onClearCompleted} title="완료 항목 삭제">
+              완료 삭제
+            </button>
+          )}
+          {queue.length > 0 && (
+            <button
+              className={`${styles.bulkBtn} ${styles.danger}`}
+              onClick={onClearAll}
+              title="전체 목록 삭제"
+            >
+              전체 초기화
+            </button>
+          )}
+        </div>
       </div>
 
       {queue.length === 0 ? (

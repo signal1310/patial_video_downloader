@@ -35,3 +35,19 @@
 .list {
   @apply space-y-4;
 }
+
+.bulkActions {
+  @apply flex gap-2;
+}
+
+.bulkBtn {
+  @apply px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 rounded transition-colors;
+}
+
+.bulkBtn:hover:not(.danger) {
+  @apply text-blue-600;
+}
+
+.danger {
+  @apply hover:bg-red-50 hover:text-red-600;
+}

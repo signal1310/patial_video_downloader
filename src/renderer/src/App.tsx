@@ -13,7 +13,10 @@ export default function App(): React.JSX.Element {
     toggleLogs,
     toggleCommand,
     cancelDownload,
-    retryDownload
+    retryDownload,
+    clearQueue,
+    clearCompleted,
+    retryFailed
   } = useDownloadQueue()
 
   // When user clicks 'edit', populate the download form with existing values
@@ -58,6 +61,9 @@ export default function App(): React.JSX.Element {
             onCancel={cancelDownload}
             onRetry={retryDownload}
             onEdit={handleEdit}
+            onClearAll={clearQueue}
+            onClearCompleted={clearCompleted}
+            onRetryFailed={retryFailed}
           />
         </div>
       </div>

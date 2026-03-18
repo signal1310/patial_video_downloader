@@ -6,7 +6,7 @@ export interface QueueItem {
   savePath: string
   isFullVideo?: boolean
   command: string
-  status: '대기 중' | '다운로드 중' | '완료' | '오류' | '취소됨'
+  status: '대기 중' | '다운로드 중' | '완료' | '오류' | '취소됨' | '중단됨'
   progress: number
   logs: string[]
   showLogs: boolean

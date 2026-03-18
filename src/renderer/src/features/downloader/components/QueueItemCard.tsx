@@ -128,7 +128,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   onRetry,
   onEdit
 }) => {
-  const isFinished = item.status === '완료' || item.status === '오류' || item.status === '취소됨'
+  const isFinished =
+    item.status === '완료' ||
+    item.status === '오류' ||
+    item.status === '취소됨' ||
+    item.status === '중단됨'
   const isDownloading = item.status === '다운로드 중'
 
   const statusClass =
@@ -140,7 +144,9 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           ? styles.statusDownloading
           : item.status === '취소됨'
             ? styles.statusCancelled
-            : styles.statusDefault
+            : item.status === '중단됨'
+              ? styles.statusInterrupted
+              : styles.statusDefault
 
   const handleCopyUrl = (e: React.MouseEvent): void => {
     e.stopPropagation()

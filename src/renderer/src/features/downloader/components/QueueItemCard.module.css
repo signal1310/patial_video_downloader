@@ -60,6 +60,9 @@
 .statusCancelled {
   @apply bg-gray-100 text-gray-500;
 }
+.statusInterrupted {
+  @apply bg-amber-50 text-amber-600 border border-amber-200;
+}
 .statusDefault {
   @apply bg-gray-100 text-gray-700;
 }

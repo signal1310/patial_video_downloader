@@ -18,15 +18,18 @@ export const useDownloadQueue = (): {
   toggleCommand: (id: string) => void
   cancelDownload: (id: string) => void
   retryDownload: (id: string) => void
+  clearQueue: () => void
+  clearCompleted: () => void
+  retryFailed: () => void
 } => {
   const [queue, setQueue] = useState<QueueItem[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as QueueItem[]
-        // 앱 재시작 시 '다운로드 중' 이었던 항목은 '취소됨'으로 변경
+        // 앱 재시작 시 '다운로드 중' 이었던 항목은 '중단됨'으로 변경
         return parsed.map((item) =>
-          item.status === '다운로드 중' ? { ...item, status: '취소됨' as const } : item
+          item.status === '다운로드 중' ? { ...item, status: '중단됨' as const } : item
         )
       } catch (e) {
         console.error('Failed to parse saved queue', e)
@@ -187,10 +190,8 @@ export const useDownloadQueue = (): {
               newQueue[idx] = item
               return newQueue
             })
-
           }
         )
-
         if (removeListener) {
           listenersRef.current.set(itemToProcess.id, removeListener)
         }
@@ -217,6 +218,37 @@ export const useDownloadQueue = (): {
     )
   }
 
+  const clearQueue = (): void => {
+    if (queue.length === 0) return
+    if (!confirm('모든 작업을 삭제하시겠습니까? (진행 중인 다운로드도 중지됩니다.)')) return
+
+    queue.forEach((item) => {
+      if (item.id) {
+        requestCancelYtdlp(item.id)
+        const cleanup = listenersRef.current.get(item.id)
+        if (cleanup) {
+          cleanup()
+          listenersRef.current.delete(item.id)
+        }
+      }
+    })
+    setQueue([])
+  }
+
+  const clearCompleted = (): void => {
+    setQueue((prev) => prev.filter((item) => item.status !== '완료'))
+  }
+
+  const retryFailed = (): void => {
+    setQueue((prev) =>
+      prev.map((item) =>
+        item.status === '오류' || item.status === '중단됨'
+          ? { ...item, status: '대기 중' as const, progress: 0, logs: [] }
+          : item
+      )
+    )
+  }
+
   return {
     queue,
     addToQueue,
@@ -224,6 +256,9 @@ export const useDownloadQueue = (): {
     toggleLogs,
     toggleCommand,
     cancelDownload,
-    retryDownload
+    retryDownload,
+    clearQueue,
+    clearCompleted,
+    retryFailed
   }
 }
