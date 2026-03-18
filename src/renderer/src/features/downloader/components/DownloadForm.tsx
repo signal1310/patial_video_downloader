@@ -125,6 +125,17 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
     localStorage.removeItem(FORM_STORAGE_KEY)
   }
 
+  const handleManualReset = async (): Promise<void> => {
+    setValues((prev) => ({
+      ...prev,
+      url: '',
+      startStr: '00:00:00',
+      endStr: '00:00:00',
+      isFullVideo: false
+    }))
+    localStorage.removeItem(FORM_STORAGE_KEY)
+  }
+
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     const success = onAdd(url, startStr, endStr, savePath, isFullVideo || false)
@@ -135,7 +146,12 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
 
   return (
     <section className={styles.container}>
-      <h2 className={styles.title}>영상 다운로드 작업 추가</h2>
+      <div className={styles.header}>
+        <h2 className={styles.title}>영상 다운로드 작업 추가</h2>
+        <button type="button" className={styles.resetBtn} onClick={handleManualReset}>
+          초기화
+        </button>
+      </div>
       <form ref={formRef} onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.topRow}>
           <div className={styles.urlSection}>

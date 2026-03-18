@@ -4,8 +4,19 @@
   @apply w-full lg:min-w-[450px] lg:max-w-[550px] lg:w-auto shrink-0 bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit;
 }
 
+.header {
+  @apply flex items-center justify-between mb-4 border-b pb-2;
+}
+
 .title {
-  @apply text-lg font-semibold mb-4 border-b pb-2;
+  @apply text-lg font-semibold;
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.resetBtn {
+  @apply text-xs font-medium text-gray-400 hover:text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors;
 }
 
 .form {
