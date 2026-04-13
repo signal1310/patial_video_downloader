@@ -78,6 +78,26 @@ export const useDownloadQueue = (): {
     })
 
     if (otherDuplicate) {
+      // 취소됨, 중단됨, 오류 상태인 경우 기존 카드를 '대기 중'으로 변경하여 재시작
+      if (['취소됨', '중단됨', '오류'].includes(otherDuplicate.status)) {
+        setQueue((prev) =>
+          prev.map((item) =>
+            item.id === otherDuplicate.id
+              ? {
+                  ...item,
+                  savePath, // 혹시 경로가 바뀌었을 수도 있으니 업데이트
+                  command,
+                  status: '대기 중',
+                  progress: 0,
+                  logs: []
+                }
+              : item
+          )
+        )
+        showToast('중단되었던 작업을 다시 시작합니다.')
+        return true
+      }
+
       if (otherDuplicate.savePath === savePath) {
         showToast(`이미 동일한 작업이 등록되어 있습니다. (상태: ${otherDuplicate.status})`)
         return false
@@ -112,17 +132,17 @@ export const useDownloadQueue = (): {
           prev.map((item) =>
             item.id === existingId
               ? {
-                ...item,
-                url,
-                startStr,
-                endStr,
-                savePath,
-                isFullVideo,
-                command,
-                status: isUnchanged && existingItem.status !== '오류' ? item.status : '대기 중',
-                progress: 0,
-                logs: []
-              }
+                  ...item,
+                  url,
+                  startStr,
+                  endStr,
+                  savePath,
+                  isFullVideo,
+                  command,
+                  status: isUnchanged && existingItem.status !== '오류' ? item.status : '대기 중',
+                  progress: 0,
+                  logs: []
+                }
               : item
           )
         )
