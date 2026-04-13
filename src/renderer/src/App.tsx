@@ -22,7 +22,7 @@ function MainContent(): React.JSX.Element {
     retryFailed
   } = useDownloadQueue()
 
-  // When user clicks 'edit', populate the download form with existing values
+  // 사용자가 '편집' 클릭 시 기존 값으로 폼 채움
   const [editValues, setEditValues] = useState<
     | {
         id: string
@@ -45,7 +45,7 @@ function MainContent(): React.JSX.Element {
       savePath: item.savePath,
       isFullVideo: item.isFullVideo
     })
-    setFormKey((k) => k + 1)
+    setFormKey((k) => k + 1) // DownloadForm을 다시 마운트하여 initialValues를 적용하도록 강제함
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

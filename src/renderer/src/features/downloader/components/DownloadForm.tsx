@@ -54,10 +54,10 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
     return { ...defaults, ...saved, ...initialValues }
   })
 
-  // Destructure for convenience in the render and effects
+  // 렌더링 및 효과에서 사용하기 편하게 비구조화 할당
   const { url, savePath, startStr, endStr, isFullVideo } = values
 
-  // Update specific field
+  // 특정 필드 업데이트
   const updateField = useCallback(
     <K extends keyof FormValues>(field: K, value: FormValues[K]): void => {
       setValues((prev) => ({ ...prev, [field]: value }))
@@ -65,7 +65,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
     []
   )
 
-  // Save to localStorage on change
+  // 변경 시 localStorage에 저장
   useEffect(() => {
     localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(values))
   }, [values])
@@ -127,7 +127,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
     }
 
     const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
-      // Ctrl + Shift + V check
+      // Ctrl + Shift + V 체크
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'v') {
         e.preventDefault()
 
@@ -146,7 +146,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
             }
 
             updateField('url', trimmed)
-            await executeDownload(trimmed)
+            await executeDownload(trimmed, true)
           } catch (err) {
             console.error('Failed to read clipboard:', err)
             showToast('클립보드 읽기에 실패했습니다.')
@@ -175,7 +175,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
 
   useEffect(() => {
     const fetchDefaultPath = async (): Promise<void> => {
-      // Only fetch if we don't have a path from initialValues OR localStorage
+      // initialValues나 localStorage에 경로가 없을 때만 가져옴
       if (!values.savePath) {
         const defaultPath = await requestDefaultDownloadPath()
         if (defaultPath) {

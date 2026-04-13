@@ -30,7 +30,7 @@ export const useDownloadQueue = (): {
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as QueueItem[]
-        // 앱 재시작 시 '다운로드 중' 이었던 항목은 '중단됨'으로 변경
+        // 앱 재시작 시 '다운로드 중' 항목은 '중단됨'으로 변경
         return parsed.map((item) =>
           item.status === '다운로드 중' ? { ...item, status: '중단됨' as const } : item
         )
@@ -44,7 +44,7 @@ export const useDownloadQueue = (): {
 
   const listenersRef = useRef(new Map<string, () => void>())
 
-  // 큐 데이터가 변경될 때마다 localStorage에 저장
+  // 큐 데이터 변경 시 localStorage 저장
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(queue))
   }, [queue])
@@ -104,26 +104,26 @@ export const useDownloadQueue = (): {
           (isFullVideo || (existingItem.startStr === startStr && existingItem.endStr === endStr))
 
         if (isUnchanged && existingItem.status === '완료') {
-          // 변경 사항이 없는데 이미 완료된 상태면 아무것도 하지 않음
+          // 변경 사항 없는데 이미 완료된 상태면 무시
           return false
         }
 
-        // 기존 아이템 업데이트 (상태를 '대기 중'으로 변경하여 재다운로드 유도)
+        // 기존 아이템 업데이트 (상태 '대기 중'으로 변경하여 재다운로드 유도)
         setQueue((prev) =>
           prev.map((item) =>
             item.id === existingId
               ? {
-                  ...item,
-                  url,
-                  startStr,
-                  endStr,
-                  savePath,
-                  isFullVideo,
-                  command,
-                  status: isUnchanged && existingItem.status !== '오류' ? item.status : '대기 중',
-                  progress: 0,
-                  logs: []
-                }
+                ...item,
+                url,
+                startStr,
+                endStr,
+                savePath,
+                isFullVideo,
+                command,
+                status: isUnchanged && existingItem.status !== '오류' ? item.status : '대기 중',
+                progress: 0,
+                logs: []
+              }
               : item
           )
         )
@@ -194,7 +194,7 @@ export const useDownloadQueue = (): {
       const pendingItems = queue.filter((item) => item.status === '대기 중')
       if (pendingItems.length === 0) return
 
-      // 일괄적으로 상태를 '다운로드 중'으로 변경
+      // 일괄 상태 변경 ('다운로드 중')
       setQueue((prev) => {
         const newQueue = [...prev]
         pendingItems.forEach((pending) => {
@@ -206,7 +206,7 @@ export const useDownloadQueue = (): {
         return newQueue
       })
 
-      // 병렬로 API 호출
+      // 병렬 API 호출
       pendingItems.forEach((itemToProcess) => {
         let partialLogBuffer = ''
 

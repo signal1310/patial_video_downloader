@@ -200,14 +200,14 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 
   return (
     <div className={`${styles.card} ${styles.clickableCard}`} onClick={handleCardClick}>
-      {/* Progress fill */}
+      {/* 진행 상태 배경 */}
       {isDownloading && (
         <div className={styles.progressBackground} style={{ width: `${item.progress}%` }} />
       )}
 
-      {/* ── Single row: info on the left, icons on the right ── */}
+      {/* 한 줄 구성: 왼쪽은 정보, 오른쪽은 아이콘 */}
       <div className={styles.row}>
-        {/* Left: info */}
+        {/* 왼쪽: 정보 */}
         <div className={styles.info}>
           <div className={styles.statusRow}>
             <span className={`${styles.statusBadge} ${statusClass}`}>{item.status}</span>
@@ -224,9 +224,9 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           </p>
         </div>
 
-        {/* Right: icon buttons */}
+        {/* 오른쪽: 아이콘 버튼들 */}
         <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
-          {/* Secondary actions: terminal / logs (always visible) */}
+          {/* 보조 액션: 터미널 / 로그 (항상 표시) */}
           <button
             className={`${styles.iconBtn} ${item.showCommand ? styles.iconBtnActive : ''}`}
             onClick={() => onToggleCommand(item.id)}
@@ -243,7 +243,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
             {item.logs.length > 0 && <span className={styles.logBadge}>{item.logs.length}</span>}
           </button>
 
-          {/* Finished-only: retry + edit */}
+          {/* 완료 시 노출: 재시작 + 편집 */}
           {isFinished && (
             <>
               <span className={styles.sep} />
@@ -257,7 +257,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
             </>
           )}
 
-          {/* Primary: cancel or delete — always last, visually distinct */}
+          {/* 주요 액션: 취소 또는 삭제 — 마지막에 위치, 시각적 구분 */}
           {isDownloading && (
             <button
               className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
@@ -303,7 +303,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
         </div>
       </div>
 
-      {/* ── Expandable details ── */}
+      {/* 상세 보기 확장 영역 */}
       {(item.showCommand || item.showLogs) && (
         <div className={styles.details} onClick={(e) => e.stopPropagation()}>
           {item.showCommand && <div className={styles.commandBox}>{item.command}</div>}
