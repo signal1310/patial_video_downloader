@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef, useLayoutEffect } from 'react'
 import styles from './QueueItemCard.module.css'
 import { QueueItem } from '../../../types'
 import { requestOpenPath, requestOpenExternal } from '../../../api/electron-api'
@@ -149,6 +149,32 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   onEdit
 }) => {
   const { showToast } = useToast()
+  const logContainerRef = useRef<HTMLDivElement>(null)
+  const isAtBottomRef = useRef(true)
+
+  // - 로그 박스가 마운트되거나 로그가 추가될 때 스크롤 처리
+  useLayoutEffect(() => {
+    const container = logContainerRef.current
+    if (!container || !item.showLogs) return
+
+    // - 사용자가 이미 맨 아래 근처(10px 이내)에 있는 경우에만 자동 스크롤
+    if (isAtBottomRef.current) {
+      container.scrollTop = container.scrollHeight
+    }
+  }, [item.logs.length, item.showLogs])
+
+  // - 스크롤 위치 감지 함수
+  const handleScroll = (): void => {
+    const container = logContainerRef.current
+    if (!container) return
+
+    // - 스크롤이 끝까지 내려왔는지 판단 (오차 범위 10px 허용)
+    const threshold = 10
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < threshold
+
+    isAtBottomRef.current = isAtBottom
+  }
   const isFinished =
     item.status === '완료' ||
     item.status === '오류' ||
@@ -313,16 +339,19 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                 <span>로그</span>
                 <span>{item.logs.length}줄</span>
               </div>
-              <div className={`${styles.logsContent} custom-scrollbar`}>
+              <div
+                ref={logContainerRef}
+                onScroll={handleScroll}
+                className={`${styles.logsContent} custom-scrollbar`}
+              >
                 {item.logs.length === 0 ? (
                   <div className={styles.logsEmpty}>로그가 없습니다.</div>
                 ) : (
                   item.logs.map((log, i) => {
                     const isWarning = log.toLowerCase().includes('warning')
                     const isError = log.toLowerCase().includes('error')
-                    const logLineClass = `${styles.logLine} ${isWarning ? styles.logWarning : ''} ${
-                      isError ? styles.logError : ''
-                    }`.trim()
+                    const logLineClass = `${styles.logLine} ${isWarning ? styles.logWarning : ''} ${isError ? styles.logError : ''
+                      }`.trim()
 
                     return (
                       <div key={i} className={logLineClass}>

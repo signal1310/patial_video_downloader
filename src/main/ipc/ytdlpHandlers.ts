@@ -100,7 +100,6 @@ export function setupYtdlpHandlers(): void {
     let targetDurationSeconds = endSec - startSec
     if (targetDurationSeconds <= 0) targetDurationSeconds = 1
 
-    // - 풀 비디오 다운로드인 경우 사전 정보 조회를 건너뛰어 즉시 시작 (요구사항 최적화)
     const shouldFetchInfo = !isFullVideo && !isQuitting && !event.sender.isDestroyed()
     let baseTitle: string | undefined = undefined
 
@@ -108,18 +107,16 @@ export function setupYtdlpHandlers(): void {
       if (!event.sender.isDestroyed()) {
         event.sender.send(`ytdlp:update:${id}`, {
           type: 'log',
-          text: '[System] 다운로드 준비 및 파일명 중복 검사 중...\n'
+          text: '[System] 영상 길이 및 파일명 확인 중...\n'
         })
       }
 
       try {
         const { durationStr, title } = await getVideoInfo(url)
 
-        // 1. 파일명 중복 방지 (요구사항 2 로직)
         const sanitizedTitle = sanitizeFilename(title)
         baseTitle = getNextAvailableFilename(savePath, sanitizedTitle)
 
-        // 2. 프로그레스 보정 로직 (요구사항 1 로직) - 전 구간이 아닌 경우에만 시간 보정
         if (!isFullVideo) {
           const videoTotalSec = parseTime(durationStr)
           if (videoTotalSec > 0) {
