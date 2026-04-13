@@ -12,7 +12,6 @@ function createWindow(): void {
     height: 850,
     minWidth: 450,
     minHeight: 480,
-    maxWidth: 1280,
     show: false,
     title: 'Partial Video Downloader',
     autoHideMenuBar: true,
