@@ -72,8 +72,9 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
       ...prev,
       id: undefined,
       url: '',
-      startStr: prev.isFullVideo ? prev.startStr : '00:00:00',
-      endStr: prev.isFullVideo ? prev.endStr : '00:00:00'
+      startStr: '00:00:00',
+      endStr: '00:00:00',
+      isFullVideo: true
     }))
     localStorage.removeItem(FORM_STORAGE_KEY)
   }, [])
