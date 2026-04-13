@@ -1,12 +1,11 @@
 import { createContext, useContext } from 'react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-export type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'system'
 
 export interface ThemeContextValue {
   theme: Theme
   setTheme: (theme: Theme) => void
-  toggleTheme: () => void
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────

@@ -322,7 +322,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           )}
         </div>
         <div className={styles.metaBottomRow}>
-          <div className={styles.savePath} title={item.savePath} onClick={handleOpenFolder}>
+          <div
+            className={styles.savePath}
+            title="클릭하여 저장 폴더 열기"
+            onClick={handleOpenFolder}
+          >
             <IconFolder title="저장 폴더" />
             {item.savePath}
           </div>
@@ -350,8 +354,9 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                   item.logs.map((log, i) => {
                     const isWarning = log.toLowerCase().includes('warning')
                     const isError = log.toLowerCase().includes('error')
-                    const logLineClass = `${styles.logLine} ${isWarning ? styles.logWarning : ''} ${isError ? styles.logError : ''
-                      }`.trim()
+                    const logLineClass = `${styles.logLine} ${isWarning ? styles.logWarning : ''} ${
+                      isError ? styles.logError : ''
+                    }`.trim()
 
                     return (
                       <div key={i} className={logLineClass}>
