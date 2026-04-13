@@ -2,6 +2,7 @@ import React from 'react'
 import styles from './QueueItemCard.module.css'
 import { QueueItem } from '../../../types'
 import { requestOpenPath } from '../../../api/electron-api'
+import { useToast } from '../../../contexts/ToastContext'
 
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 const IconLogs = ({ size = 14 }: { size?: number }): React.JSX.Element => (
@@ -147,6 +148,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   onRetry,
   onEdit
 }) => {
+  const { showToast } = useToast()
   const isFinished =
     item.status === '완료' ||
     item.status === '오류' ||
@@ -170,6 +172,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   const handleCopyUrl = (e: React.MouseEvent): void => {
     e.stopPropagation()
     navigator.clipboard.writeText(item.url)
+    showToast('URL이 복사되었습니다.')
   }
 
   const handleCardClick = (): void => {
@@ -180,6 +183,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     e.stopPropagation()
     if (item.filename) {
       navigator.clipboard.writeText(item.filename)
+      showToast('파일명이 복사되었습니다.')
     }
   }
 
@@ -205,7 +209,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               <span className={styles.progressText}>{item.progress.toFixed(1)}%</span>
             )}
           </div>
-          <p className={styles.urlText} title="클릭하여 복사" onClick={handleCopyUrl}>
+          <p className={styles.urlText} title="클릭하여 URL 복사" onClick={handleCopyUrl}>
             {item.url}
           </p>
         </div>
@@ -273,10 +277,10 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           {item.filename && (
             <div
               className={styles.filename}
-              title="클릭하여 파일 이름 복사"
+              title="클릭하여 파일명 복사"
               onClick={handleCopyFilename}
             >
-              <IconFile title="파일 이름" />
+              <IconFile title="파일명" />
               {item.filename}
             </div>
           )}
@@ -303,16 +307,19 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                 {item.logs.length === 0 ? (
                   <div className={styles.logsEmpty}>로그가 없습니다.</div>
                 ) : (
-                  item.logs.map((log, i) => (
-                    <div
-                      key={i}
-                      className={`${styles.logLine} ${
-                        log.includes('warning') || log.includes('WARNING') ? styles.logWarning : ''
-                      } ${log.includes('error') || log.includes('ERROR') ? styles.logError : ''}`}
-                    >
-                      {log}
-                    </div>
-                  ))
+                  item.logs.map((log, i) => {
+                    const isWarning = log.toLowerCase().includes('warning')
+                    const isError = log.toLowerCase().includes('error')
+                    const logLineClass = `${styles.logLine} ${isWarning ? styles.logWarning : ''} ${
+                      isError ? styles.logError : ''
+                    }`.trim()
+
+                    return (
+                      <div key={i} className={logLineClass}>
+                        {log}
+                      </div>
+                    )
+                  })
                 )}
               </div>
             </div>
