@@ -4,6 +4,7 @@ import { setupDialogHandlers } from './ipc/dialogHandlers'
 import { setupYtdlpHandlers, cleanupAllProcesses, hasActiveProcesses } from './ipc/ytdlpHandlers'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import pkg from '../../package.json'
 
 function createWindow(): void {
   // Create the browser window.
@@ -13,7 +14,7 @@ function createWindow(): void {
     minWidth: 450,
     minHeight: 480,
     show: false,
-    title: 'Partial Video Downloader',
+    title: `Partial Video Downloader v${pkg.version}`,
     autoHideMenuBar: true,
     icon,
     webPreferences: {
