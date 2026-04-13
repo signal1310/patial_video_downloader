@@ -1,27 +1,84 @@
 import { ipcMain } from 'electron'
 import { spawn, ChildProcess, exec, execSync } from 'child_process'
 import { getYtdlpArgs } from '../../common/ytdlp'
+import * as fs from 'fs'
+import * as path from 'path'
 
 const activeProcesses = new Map<string, { proc: ChildProcess; pid: number; savePath: string }>()
 const cancelledIds = new Set<string>()
 let isQuitting = false
 
 /**
- * - 영상 재생 시간을 초 단위로 추출하는 헬퍼 함수
+ * - 영상 재생 시간(초)과 원래 제목을 추출하는 헬퍼 함수
  */
-async function getVideoDuration(url: string): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
+async function getVideoInfo(url: string): Promise<{ durationStr: string; title: string }> {
+  return new Promise((resolve, reject) => {
     let output = ''
-    const p = spawn('yt-dlp', ['--no-playlist', '--flat-playlist', '--print', 'duration', url])
+    // - getYtdlpArgs를 통해 일관된 정보 추출 인자 사용
+    const args = getYtdlpArgs({ url, savePath: '', startStr: '', endStr: '' }, 'info')
+    const p = spawn('yt-dlp', args)
     p.stdout.on('data', (d) => {
       output += d.toString()
     })
     p.on('close', (code) => {
-      if (code === 0) resolve(output.trim())
-      else reject(new Error('Failed to fetch duration'))
+      if (code === 0) {
+        const lines = output.trim().split('\n')
+        const data = lines[lines.length - 1] || ''
+        const parts = data.split('|')
+        if (parts.length >= 2) {
+          resolve({ durationStr: parts[0], title: parts.slice(1).join('|') })
+        } else {
+          resolve({ durationStr: parts[0] || '0', title: 'download' })
+        }
+      } else reject(new Error('Failed to fetch video info'))
     })
     p.on('error', reject)
   })
+}
+
+/**
+ * - 윈도우 파일 시스템에서 허용되지 않는 문자를 언더바로 치환
+ */
+function sanitizeFilename(name: string): string {
+  if (!name) return 'download'
+  let safe = name.replace(/[:]/g, ' - ') // 제목 내 콜론은 보통 대시로 변환
+  safe = safe.replace(/[\\/*?"<>|]/g, '_')
+  return safe
+}
+
+/**
+ * - 대상 폴더를 스캔하여 지정된 baseName 중복 시 _1, _2 등을 붙인 이름을 반환
+ */
+function getNextAvailableFilename(saveDir: string, baseName: string): string {
+  try {
+    if (!fs.existsSync(saveDir)) return baseName
+
+    const files = fs.readdirSync(saveDir)
+    let maxSuffix = 0
+    let exactMatch = false
+
+    for (const file of files) {
+      const ext = path.extname(file)
+      const nameWithoutExt = path.basename(file, ext)
+
+      if (nameWithoutExt === baseName) {
+        exactMatch = true
+      } else if (nameWithoutExt.startsWith(`${baseName}_`)) {
+        const suffixStr = nameWithoutExt.substring(baseName.length + 1)
+        if (/^\d+$/.test(suffixStr)) {
+          const num = parseInt(suffixStr, 10)
+          if (num > maxSuffix) maxSuffix = num
+        }
+      }
+    }
+
+    if (exactMatch || maxSuffix > 0) {
+      return `${baseName}_${Math.max(1, maxSuffix + 1)}`
+    }
+    return baseName
+  } catch {
+    return baseName
+  }
 }
 
 export function setupYtdlpHandlers(): void {
@@ -43,38 +100,48 @@ export function setupYtdlpHandlers(): void {
     let targetDurationSeconds = endSec - startSec
     if (targetDurationSeconds <= 0) targetDurationSeconds = 1
 
-    const shouldCheckDuration = !isFullVideo && !isQuitting && !event.sender.isDestroyed()
-    if (shouldCheckDuration) {
+    // - 풀 비디오 다운로드인 경우 사전 정보 조회를 건너뛰어 즉시 시작 (요구사항 최적화)
+    const shouldFetchInfo = !isFullVideo && !isQuitting && !event.sender.isDestroyed()
+    let baseTitle: string | undefined = undefined
+
+    if (shouldFetchInfo) {
       if (!event.sender.isDestroyed()) {
         event.sender.send(`ytdlp:update:${id}`, {
           type: 'log',
-          text: '[System] 영상 길이를 확인 중입니다...\n'
+          text: '[System] 다운로드 준비 및 파일명 중복 검사 중...\n'
         })
       }
 
       try {
-        const durationStr = await getVideoDuration(url)
-        const videoTotalSec = parseTime(durationStr)
+        const { durationStr, title } = await getVideoInfo(url)
 
-        if (videoTotalSec > 0) {
-          const actualRemainingSec = videoTotalSec - startSec
-          if (actualRemainingSec > 0 && targetDurationSeconds > actualRemainingSec) {
-            targetDurationSeconds = actualRemainingSec
-          }
+        // 1. 파일명 중복 방지 (요구사항 2 로직)
+        const sanitizedTitle = sanitizeFilename(title)
+        baseTitle = getNextAvailableFilename(savePath, sanitizedTitle)
 
-          // 0초부터 시작하고 영상 전체를 포함할 경우 전 구간 다운로드로 전환
-          if (startSec === 0 && targetDurationSeconds >= videoTotalSec) {
-            isFullVideo = true
-            if (!event.sender.isDestroyed()) {
-              event.sender.send(`ytdlp:update:${id}`, {
-                type: 'log',
-                text: `[System] 요청 구간(0초~${targetDurationSeconds}초)이 원본 시간(${videoTotalSec}초) 전체를 포함하므로 전 구간 다운로드를 시작합니다.\n`
-              })
+        // 2. 프로그레스 보정 로직 (요구사항 1 로직) - 전 구간이 아닌 경우에만 시간 보정
+        if (!isFullVideo) {
+          const videoTotalSec = parseTime(durationStr)
+          if (videoTotalSec > 0) {
+            const actualRemainingSec = videoTotalSec - startSec
+            if (actualRemainingSec > 0 && targetDurationSeconds > actualRemainingSec) {
+              targetDurationSeconds = actualRemainingSec
+            }
+
+            // 0초부터 시작하고 영상 전체를 포함할 경우 전 구간 다운로드로 전환
+            if (startSec === 0 && targetDurationSeconds >= videoTotalSec) {
+              isFullVideo = true
+              if (!event.sender.isDestroyed()) {
+                event.sender.send(`ytdlp:update:${id}`, {
+                  type: 'log',
+                  text: `[System] 요청 구간(0초~${targetDurationSeconds}초)이 원본 시간(${videoTotalSec}초) 전체를 포함하므로 전 구간 다운로드를 시작합니다.\n`
+                })
+              }
             }
           }
         }
       } catch {
-        console.warn(`[Main] Failed to fetch duration for ${url}`)
+        console.warn(`[Main] Failed to fetch info for ${url}`)
       }
     }
 
@@ -86,7 +153,7 @@ export function setupYtdlpHandlers(): void {
       return
     }
 
-    const args = getYtdlpArgs({ url, savePath, startStr, endStr, isFullVideo })
+    const args = getYtdlpArgs({ url, savePath, startStr, endStr, isFullVideo, baseTitle })
 
     const ytDlpProcess = spawn('yt-dlp', args)
 

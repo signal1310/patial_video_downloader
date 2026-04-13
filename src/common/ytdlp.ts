@@ -4,25 +4,40 @@ export interface YtdlpCommandArgs {
   startStr: string
   endStr: string
   isFullVideo?: boolean
+  baseTitle?: string
 }
 
 /**
  * - 다운로드 파일명 템플릿 (영상 ID 접미사 제외)
+ * - 메인 프로세스에서 중복 방지 처리를 마친 이름을 받아 사용
  */
 export const FILENAME_TEMPLATE = '%(title)s.%(ext)s'
 
 /**
  * - yt-dlp 실행 인자 배열 생성 유틸리티
  */
-export function getYtdlpArgs(req: YtdlpCommandArgs): string[] {
-  const { url, savePath, startStr, endStr, isFullVideo } = req
-  const outputPath = `${savePath}/${FILENAME_TEMPLATE}`
+export function getYtdlpArgs(
+  req: YtdlpCommandArgs,
+  mode: 'info' | 'download' = 'download'
+): string[] {
+  const { url, savePath, startStr, endStr, isFullVideo, baseTitle } = req
+  const common = ['--no-playlist', '--flat-playlist']
 
-  if (isFullVideo) {
-    return ['-o', outputPath, url]
+  // - 정보 추출 모드: 재생 시간 및 제목 추출용 인자 반환
+  if (mode === 'info') {
+    return [...common, '--print', '%(duration)s|%(title)s', url]
   }
 
-  return ['--download-sections', `*${startStr}-${endStr}`, '-o', outputPath, url]
+  // - 다운로드 모드: 실제 영상 저장용 인자 반환
+  const fileNameTemplate = baseTitle ? `${baseTitle}.%(ext)s` : FILENAME_TEMPLATE
+  const outputPath = `${savePath}/${fileNameTemplate}`
+  const downloadArgs = ['-o', outputPath]
+
+  if (isFullVideo) {
+    return [...common, ...downloadArgs, url]
+  }
+
+  return [...common, '--download-sections', `*${startStr}-${endStr}`, ...downloadArgs, url]
 }
 
 /**
