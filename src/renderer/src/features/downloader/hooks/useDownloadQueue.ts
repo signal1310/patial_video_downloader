@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { QueueItem } from '../../../types'
 import { requestRunYtdlp, onYtdlpUpdate, requestCancelYtdlp } from '../../../api/electron-api'
+import { useToast } from '../../../contexts/ToastContext'
 
 const STORAGE_KEY = 'patial_video_downloader_queue'
 
@@ -23,6 +24,7 @@ export const useDownloadQueue = (): {
   clearCompleted: () => void
   retryFailed: () => void
 } => {
+  const { showToast } = useToast()
   const [queue, setQueue] = useState<QueueItem[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
@@ -56,7 +58,7 @@ export const useDownloadQueue = (): {
     existingId?: string
   ): boolean => {
     if (!url) {
-      alert('영상 URL을 입력해주세요.')
+      showToast('영상 URL을 입력해주세요.')
       return false
     }
 
@@ -78,7 +80,7 @@ export const useDownloadQueue = (): {
 
     if (otherDuplicate) {
       if (otherDuplicate.savePath === savePath) {
-        alert(`이미 동일한 작업이 등록되어 있습니다. (상태: ${otherDuplicate.status})`)
+        showToast(`이미 동일한 작업이 등록되어 있습니다. (상태: ${otherDuplicate.status})`)
         return false
       } else {
         if (
@@ -149,12 +151,14 @@ export const useDownloadQueue = (): {
   }
 
   const removeFromQueue = (id: string): void => {
+    const item = queue.find((q) => q.id === id)
     setQueue((prev) => prev.filter((item) => item.id !== id))
     const cleanup = listenersRef.current.get(id)
     if (cleanup) {
       cleanup()
       listenersRef.current.delete(id)
     }
+    showToast(`${item?.filename || '작업'}이(가) 삭제되었습니다.`)
   }
 
   const toggleLogs = (id: string): void => {
@@ -253,7 +257,12 @@ export const useDownloadQueue = (): {
                   item.logs.push(partialLogBuffer.trim())
                 }
                 item.status = data.code === 0 ? '완료' : '오류'
-                if (data.code === 0) item.progress = 100
+                if (data.code === 0) {
+                  item.progress = 100
+                  showToast(`다운로드 완료: ${item.filename || item.url}`)
+                } else {
+                  showToast(`다운로드 실패: ${item.filename || item.url}`)
+                }
               }
 
               newQueue[idx] = item
@@ -277,7 +286,7 @@ export const useDownloadQueue = (): {
     }
 
     processNext()
-  }, [hasPendingItems, queue])
+  }, [hasPendingItems, queue, showToast])
 
   const retryDownload = (id: string): void => {
     setQueue((prev) =>
@@ -306,6 +315,7 @@ export const useDownloadQueue = (): {
 
   const clearCompleted = (): void => {
     setQueue((prev) => prev.filter((item) => item.status !== '완료'))
+    showToast('완료된 작업들을 모두 삭제했습니다.')
   }
 
   const retryFailed = (): void => {
