@@ -5,7 +5,6 @@
 /coverage
 
 # Production and Build artifacts
-/build
 /dist
 /out
 /release

@@ -1,7 +1,7 @@
 {
   "name": "patial_video_downloader",
   "version": "1.0.0",
-  "productName": "Partial Video Downloader",
+  "productName": "Partial Video Downloader v1.0",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
