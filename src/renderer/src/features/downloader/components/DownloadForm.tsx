@@ -4,6 +4,8 @@ import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { TimePicker } from '../../../components/ui/TimePicker'
 import { requestSelectFolder, requestDefaultDownloadPath } from '../../../api/electron-api'
+import { useToast } from '../../../contexts/ToastContext'
+import { isValidUrl } from '../../../utils/url'
 
 interface FormValues {
   id?: string
@@ -29,6 +31,7 @@ interface DownloadFormProps {
 const FORM_STORAGE_KEY = 'patial_video_downloader_form_state'
 
 export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues }) => {
+  const { showToast } = useToast()
   const formRef = useRef<HTMLFormElement>(null)
 
   const [values, setValues] = useState<FormValues>(() => {
@@ -92,13 +95,21 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
   }, [])
 
   const executeDownload = useCallback(
-    async (targetUrl: string): Promise<void> => {
-      const success = onAdd(targetUrl, startStr, endStr, savePath, isFullVideo || false, values.id)
+    async (targetUrl: string, forceFullVideo?: boolean): Promise<void> => {
+      if (!isValidUrl(targetUrl)) {
+        showToast('유효한 영상 URL을 입력해주세요.')
+        return
+      }
+
+      const useFullVideo = forceFullVideo || isFullVideo || false
+      const success = onAdd(targetUrl, startStr, endStr, savePath, useFullVideo, values.id)
+
       if (success) {
+        showToast('다운로드 작업이 대기열에 추가되었습니다.')
         await handleReset()
       }
     },
-    [onAdd, startStr, endStr, savePath, isFullVideo, values.id, handleReset]
+    [onAdd, startStr, endStr, savePath, isFullVideo, values.id, handleReset, showToast]
   )
 
   useEffect(() => {
@@ -120,17 +131,25 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'v') {
         e.preventDefault()
 
-        // setTimeout을 사용하여 keydown 이벤트 핸들러를 즉시 종료시킨 후 비동기 작업 수행 (키 씹힘/UI 멈춤 버그 방지)
         setTimeout(async () => {
           try {
             const text = await navigator.clipboard.readText()
             const trimmed = text.trim()
-            if (trimmed.startsWith('http') || trimmed.startsWith('www')) {
-              updateField('url', trimmed)
-              await executeDownload(trimmed)
+            if (!trimmed) {
+              showToast('클립보드가 비어 있습니다.')
+              return
             }
+            if (!isValidUrl(trimmed)) {
+              const displayInfo = trimmed.length > 20 ? `${trimmed.slice(0, 20)}...` : trimmed
+              showToast(`클립보드 값 "${displayInfo}"은(는) 유효한 URL이 아닙니다.`)
+              return
+            }
+
+            updateField('url', trimmed)
+            await executeDownload(trimmed)
           } catch (err) {
             console.error('Failed to read clipboard:', err)
+            showToast('클립보드 읽기에 실패했습니다.')
           }
         }, 0)
         return
@@ -152,7 +171,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
       window.removeEventListener('paste', handlePaste)
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [updateField, executeDownload])
+  }, [updateField, executeDownload, showToast])
 
   useEffect(() => {
     const fetchDefaultPath = async (): Promise<void> => {
