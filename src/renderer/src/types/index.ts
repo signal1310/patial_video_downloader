@@ -11,6 +11,8 @@ export interface QueueItem {
   logs: string[]
   showLogs: boolean
   showCommand: boolean
+  title?: string
+  filename?: string
 }
 
 export interface CustomWindow {

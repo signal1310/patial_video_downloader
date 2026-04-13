@@ -92,7 +92,7 @@ const IconX = ({ size = 14 }: { size?: number }): React.JSX.Element => (
   </svg>
 )
 
-const IconFolder = ({ size = 12 }: { size?: number }): React.JSX.Element => (
+const IconFolder = ({ size = 12, title }: { size?: number; title?: string }): React.JSX.Element => (
   <svg
     width={size}
     height={size}
@@ -104,7 +104,26 @@ const IconFolder = ({ size = 12 }: { size?: number }): React.JSX.Element => (
     strokeLinejoin="round"
     style={{ shapeRendering: 'geometricPrecision', display: 'block' }}
   >
+    {title && <title>{title}</title>}
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+  </svg>
+)
+
+const IconFile = ({ size = 12, title }: { size?: number; title?: string }): React.JSX.Element => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ shapeRendering: 'geometricPrecision', display: 'block' }}
+  >
+    {title && <title>{title}</title>}
+    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+    <polyline points="13 2 13 9 20 9" />
   </svg>
 )
 
@@ -155,6 +174,13 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 
   const handleCardClick = (): void => {
     onToggleLogs(item.id)
+  }
+
+  const handleCopyFilename = (e: React.MouseEvent): void => {
+    e.stopPropagation()
+    if (item.filename) {
+      navigator.clipboard.writeText(item.filename)
+    }
   }
 
   const handleOpenFolder = (e: React.MouseEvent): void => {
@@ -239,13 +265,27 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
         </div>
       </div>
 
-      <div className={styles.metaRow}>
-        <span className={styles.timeRange}>
-          {item.isFullVideo ? '전체 영상' : `구간 ${item.startStr} ~ ${item.endStr}`}
-        </span>
-        <div className={styles.savePath} title={item.savePath} onClick={handleOpenFolder}>
-          <IconFolder />
-          {item.savePath}
+      <div className={styles.metaContainer}>
+        <div className={styles.metaTopRow}>
+          <span className={styles.timeRange}>
+            {item.isFullVideo ? '전체 영상' : `구간 ${item.startStr} ~ ${item.endStr}`}
+          </span>
+          {item.filename && (
+            <div
+              className={styles.filename}
+              title="클릭하여 파일 이름 복사"
+              onClick={handleCopyFilename}
+            >
+              <IconFile title="파일 이름" />
+              {item.filename}
+            </div>
+          )}
+        </div>
+        <div className={styles.metaBottomRow}>
+          <div className={styles.savePath} title={item.savePath} onClick={handleOpenFolder}>
+            <IconFolder title="저장 폴더" />
+            {item.savePath}
+          </div>
         </div>
       </div>
 
@@ -266,8 +306,9 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                   item.logs.map((log, i) => (
                     <div
                       key={i}
-                      className={`${styles.logLine} ${log.includes('warning') || log.includes('WARNING') ? styles.logWarning : ''
-                        } ${log.includes('error') || log.includes('ERROR') ? styles.logError : ''}`}
+                      className={`${styles.logLine} ${
+                        log.includes('warning') || log.includes('WARNING') ? styles.logWarning : ''
+                      } ${log.includes('error') || log.includes('ERROR') ? styles.logError : ''}`}
                     >
                       {log}
                     </div>

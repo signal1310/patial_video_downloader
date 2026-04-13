@@ -131,14 +131,28 @@
   color: #3b82f6;
 }
 
-.metaRow {
+.metaContainer {
   position: relative;
   z-index: 10;
   display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+  gap: 4px;
+  min-width: 0;
+}
+
+.metaTopRow {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 6px;
   gap: 12px;
+  min-width: 0;
+}
+
+.metaBottomRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   min-width: 0;
 }
 
@@ -157,6 +171,20 @@
 }
 
 .savePath svg {
+  color: var(--theme-text-muted);
+  flex-shrink: 0;
+}
+
+.filename {
+  @apply text-xs truncate flex items-center gap-1 min-w-0 cursor-copy hover:underline;
+  color: var(--theme-text-muted);
+  max-width: 100%;
+}
+.filename:hover {
+  color: #3b82f6;
+}
+
+.filename svg {
   color: var(--theme-text-muted);
   flex-shrink: 0;
 }
@@ -187,11 +215,11 @@
   height: 34px;
   border-radius: 8px;
   border: none;
-  background: transparent;
+  background-color: transparent;
   color: var(--theme-text-muted);
   cursor: pointer;
   transition:
-    background 0.12s,
+    background-color 0.12s,
     color 0.12s;
 }
 

@@ -244,6 +244,8 @@ export const useDownloadQueue = (): {
                 })
 
                 item.logs = newLogs
+              } else if (data.type === 'filename' && data.text) {
+                item.filename = data.text.split(/[/\\]/).pop()
               } else if (data.type === 'progress') {
                 item.progress = data.percent ?? 0
               } else if (data.type === 'done') {

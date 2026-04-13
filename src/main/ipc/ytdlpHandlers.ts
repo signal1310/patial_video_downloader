@@ -42,6 +42,20 @@ export function setupYtdlpHandlers(): void {
       // Emit raw chunks so frontend handles \r logic
       event.sender.send(`ytdlp:update:${id}`, { type: 'log', text })
 
+      // 파일명(Destination) 추출
+      const destMatch = text.match(/\[download\] Destination: (.+)/)
+      const mergeMatch = text.match(/\[Merger\] Merging formats into "(.+?)"/)
+      const alreadyMatch = text.match(/\[download\] (.+) has already been downloaded/)
+
+      let filenameStr = ''
+      if (mergeMatch) filenameStr = mergeMatch[1]
+      else if (destMatch) filenameStr = destMatch[1]
+      else if (alreadyMatch) filenameStr = alreadyMatch[1]
+
+      if (filenameStr && !isQuitting && !event.sender.isDestroyed()) {
+        event.sender.send(`ytdlp:update:${id}`, { type: 'filename', text: filenameStr.trim() })
+      }
+
       // 1. [download] XX.X% style standard yt-dlp progress
       const downloadMatch = text.match(/\[download\]\s+([\d.]+)%/)
       if (downloadMatch) {
