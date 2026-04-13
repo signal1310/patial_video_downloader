@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import styles from './DownloadForm.module.css'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
@@ -55,14 +55,50 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
   const { url, savePath, startStr, endStr, isFullVideo } = values
 
   // Update specific field
-  const updateField = <K extends keyof FormValues>(field: K, value: FormValues[K]): void => {
-    setValues((prev) => ({ ...prev, [field]: value }))
-  }
+  const updateField = useCallback(
+    <K extends keyof FormValues>(field: K, value: FormValues[K]): void => {
+      setValues((prev) => ({ ...prev, [field]: value }))
+    },
+    []
+  )
 
   // Save to localStorage on change
   useEffect(() => {
     localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(values))
   }, [values])
+
+  const handleReset = useCallback(async (): Promise<void> => {
+    setValues((prev) => ({
+      ...prev,
+      id: undefined,
+      url: '',
+      startStr: prev.isFullVideo ? prev.startStr : '00:00:00',
+      endStr: prev.isFullVideo ? prev.endStr : '00:00:00'
+    }))
+    localStorage.removeItem(FORM_STORAGE_KEY)
+  }, [])
+
+  const handleManualReset = useCallback(async (): Promise<void> => {
+    setValues((prev) => ({
+      ...prev,
+      id: undefined,
+      url: '',
+      startStr: '00:00:00',
+      endStr: '00:00:00',
+      isFullVideo: false
+    }))
+    localStorage.removeItem(FORM_STORAGE_KEY)
+  }, [])
+
+  const executeDownload = useCallback(
+    async (targetUrl: string): Promise<void> => {
+      const success = onAdd(targetUrl, startStr, endStr, savePath, isFullVideo || false, values.id)
+      if (success) {
+        await handleReset()
+      }
+    },
+    [onAdd, startStr, endStr, savePath, isFullVideo, values.id, handleReset]
+  )
 
   useEffect(() => {
     const handlePaste = (e: globalThis.ClipboardEvent): void => {
@@ -79,6 +115,26 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
     }
 
     const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
+      // Ctrl + Shift + V check
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'v') {
+        e.preventDefault()
+
+        // setTimeout을 사용하여 keydown 이벤트 핸들러를 즉시 종료시킨 후 비동기 작업 수행 (키 씹힘/UI 멈춤 버그 방지)
+        setTimeout(async () => {
+          try {
+            const text = await navigator.clipboard.readText()
+            const trimmed = text.trim()
+            if (trimmed.startsWith('http') || trimmed.startsWith('www')) {
+              updateField('url', trimmed)
+              await executeDownload(trimmed)
+            }
+          } catch (err) {
+            console.error('Failed to read clipboard:', err)
+          }
+        }, 0)
+        return
+      }
+
       if (e.key === 'Enter') {
         const activeEl = document.activeElement
         if (!activeEl || activeEl === document.body || activeEl === document.documentElement) {
@@ -95,7 +151,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
       window.removeEventListener('paste', handlePaste)
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [])
+  }, [updateField, executeDownload])
 
   useEffect(() => {
     const fetchDefaultPath = async (): Promise<void> => {
@@ -108,7 +164,7 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
       }
     }
     fetchDefaultPath()
-  }, [initialValues, values.savePath])
+  }, [values.savePath, updateField])
 
   const handleSelectFolder = async (): Promise<void> => {
     const selectedPath = await requestSelectFolder()
@@ -117,35 +173,9 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({ onAdd, initialValues
     }
   }
 
-  const handleReset = async (): Promise<void> => {
-    setValues((prev) => ({
-      ...prev,
-      id: undefined,
-      url: '',
-      startStr: prev.isFullVideo ? prev.startStr : '00:00:00',
-      endStr: prev.isFullVideo ? prev.endStr : '00:00:00'
-    }))
-    localStorage.removeItem(FORM_STORAGE_KEY)
-  }
-
-  const handleManualReset = async (): Promise<void> => {
-    setValues((prev) => ({
-      ...prev,
-      id: undefined,
-      url: '',
-      startStr: '00:00:00',
-      endStr: '00:00:00',
-      isFullVideo: false
-    }))
-    localStorage.removeItem(FORM_STORAGE_KEY)
-  }
-
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
-    const success = onAdd(url, startStr, endStr, savePath, isFullVideo || false, values.id)
-    if (success) {
-      await handleReset()
-    }
+    await executeDownload(url)
   }
 
   return (
