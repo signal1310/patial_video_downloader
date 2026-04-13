@@ -23,6 +23,9 @@ const api = {
   },
   openPath: (path: string) => {
     return ipcRenderer.invoke('shell:openPath', path)
+  },
+  openExternal: (url: string) => {
+    return ipcRenderer.invoke('shell:openExternal', url)
   }
 }
 

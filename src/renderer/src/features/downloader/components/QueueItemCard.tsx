@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './QueueItemCard.module.css'
 import { QueueItem } from '../../../types'
-import { requestOpenPath } from '../../../api/electron-api'
+import { requestOpenPath, requestOpenExternal } from '../../../api/electron-api'
 import { useToast } from '../../../contexts/ToastContext'
 
 // ── SVG Icons ────────────────────────────────────────────────────────────────
@@ -110,7 +110,7 @@ const IconFolder = ({ size = 12, title }: { size?: number; title?: string }): Re
   </svg>
 )
 
-const IconFile = ({ size = 12, title }: { size?: number; title?: string }): React.JSX.Element => (
+const IconLink = ({ size = 12, title }: { size?: number; title?: string }): React.JSX.Element => (
   <svg
     width={size}
     height={size}
@@ -123,8 +123,8 @@ const IconFile = ({ size = 12, title }: { size?: number; title?: string }): Reac
     style={{ shapeRendering: 'geometricPrecision', display: 'block' }}
   >
     {title && <title>{title}</title>}
-    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-    <polyline points="13 2 13 9 20 9" />
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
   </svg>
 )
 
@@ -171,6 +171,12 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 
   const handleCopyUrl = (e: React.MouseEvent): void => {
     e.stopPropagation()
+    if (e.ctrlKey) {
+      if (window.confirm('브라우저에서 이 URL을 여시겠습니까?')) {
+        requestOpenExternal(item.url)
+      }
+      return
+    }
     navigator.clipboard.writeText(item.url)
     showToast('URL이 복사되었습니다.')
   }
@@ -209,8 +215,12 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               <span className={styles.progressText}>{item.progress.toFixed(1)}%</span>
             )}
           </div>
-          <p className={styles.urlText} title="클릭하여 URL 복사" onClick={handleCopyUrl}>
-            {item.url}
+          <p
+            className={styles.urlText}
+            title={item.filename ? '클릭하여 파일명 복사' : '클릭하여 URL 복사'}
+            onClick={item.filename ? handleCopyFilename : handleCopyUrl}
+          >
+            {item.filename || item.url}
           </p>
         </div>
 
@@ -277,11 +287,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           {item.filename && (
             <div
               className={styles.filename}
-              title="클릭하여 파일명 복사"
-              onClick={handleCopyFilename}
+              title="클릭하여 URL 복사 / Ctrl+클릭하여 브라우저에서 열기"
+              onClick={handleCopyUrl}
             >
-              <IconFile title="파일명" />
-              {item.filename}
+              <IconLink title="URL" />
+              {item.url}
             </div>
           )}
         </div>

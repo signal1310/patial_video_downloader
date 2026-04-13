@@ -26,6 +26,7 @@ export interface CustomWindow {
     ) => () => void
     cancelYtdlp: (id: string) => void
     openPath: (path: string) => Promise<string>
+    openExternal: (url: string) => Promise<void>
   }
   showDirectoryPicker?: () => Promise<{ name: string }>
 }

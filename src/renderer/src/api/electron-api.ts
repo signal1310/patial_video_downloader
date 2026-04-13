@@ -66,3 +66,10 @@ export const requestOpenPath = async (path: string): Promise<string | undefined>
   }
   return undefined
 }
+
+export const requestOpenExternal = async (url: string): Promise<void> => {
+  const customWindow = window as unknown as CustomWindow
+  if (customWindow.api?.openExternal) {
+    await customWindow.api.openExternal(url)
+  }
+}

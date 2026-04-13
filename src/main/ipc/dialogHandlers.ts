@@ -19,4 +19,8 @@ export function setupDialogHandlers(): void {
   ipcMain.handle('shell:openPath', async (_, path: string) => {
     return await shell.openPath(path)
   })
+
+  ipcMain.handle('shell:openExternal', async (_, url: string) => {
+    return await shell.openExternal(url)
+  })
 }
