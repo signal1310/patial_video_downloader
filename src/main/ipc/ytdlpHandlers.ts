@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { spawn, ChildProcess, exec, execSync } from 'child_process'
+import { getYtdlpArgs } from '../../common/ytdlp'
 
 const activeProcesses = new Map<string, { proc: ChildProcess; pid: number; savePath: string }>()
 const cancelledIds = new Set<string>()
@@ -9,10 +10,7 @@ export function setupYtdlpHandlers(): void {
   ipcMain.on('ytdlp:run', (event, req) => {
     const { id, url, savePath, startStr, endStr, isFullVideo } = req
 
-    // Command is roughly: yt-dlp --download-sections "*start-end" -P savePath url
-    const args = isFullVideo
-      ? ['-P', savePath, url]
-      : ['--download-sections', `*${startStr}-${endStr}`, '-P', savePath, url]
+    const args = getYtdlpArgs({ url, savePath, startStr, endStr, isFullVideo })
 
     const ytDlpProcess = spawn('yt-dlp', args)
 

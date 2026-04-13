@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { QueueItem } from '../../../types'
 import { requestRunYtdlp, onYtdlpUpdate, requestCancelYtdlp } from '../../../api/electron-api'
 import { useToast } from '../../../contexts/ToastContext'
+import { getYtdlpDisplayCommand } from '@common/ytdlp'
 
 const STORAGE_KEY = 'patial_video_downloader_queue'
 
@@ -62,9 +63,7 @@ export const useDownloadQueue = (): {
       return false
     }
 
-    const command = isFullVideo
-      ? `yt-dlp -P "${savePath}" "${url}"`
-      : `yt-dlp --download-sections "*${startStr}-${endStr}" -P "${savePath}" "${url}"`
+    const command = getYtdlpDisplayCommand({ url, savePath, startStr, endStr, isFullVideo })
 
     // 중복 확인 (본인 제외)
     const otherDuplicate = queue.find((item) => {
