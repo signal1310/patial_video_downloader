@@ -21,7 +21,7 @@ export function getYtdlpArgs(
   mode: 'info' | 'download' = 'download'
 ): string[] {
   const { url, savePath, startStr, endStr, isFullVideo, baseTitle } = req
-  const common = ['--no-playlist', '--flat-playlist']
+  const common = ['--no-playlist', '--flat-playlist', '--encoding', 'utf-8']
 
   // - 정보 추출 모드: 재생 시간 및 제목 추출용 인자 반환
   if (mode === 'info') {

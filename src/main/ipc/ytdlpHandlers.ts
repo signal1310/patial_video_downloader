@@ -17,6 +17,7 @@ async function getVideoInfo(url: string): Promise<{ durationStr: string; title: 
     // - getYtdlpArgs를 통해 일관된 정보 추출 인자 사용
     const args = getYtdlpArgs({ url, savePath: '', startStr: '', endStr: '' }, 'info')
     const p = spawn('yt-dlp', args)
+    p.stdout.setEncoding('utf8')
     p.stdout.on('data', (d) => {
       output += d.toString()
     })
@@ -153,6 +154,8 @@ export function setupYtdlpHandlers(): void {
     const args = getYtdlpArgs({ url, savePath, startStr, endStr, isFullVideo, baseTitle })
 
     const ytDlpProcess = spawn('yt-dlp', args)
+    ytDlpProcess.stdout.setEncoding('utf8')
+    ytDlpProcess.stderr.setEncoding('utf8')
 
     console.log(`[Main] Started yt-dlp for ID: ${id}, PID: ${ytDlpProcess.pid}, Path: ${savePath}`)
     if (ytDlpProcess.pid) {
