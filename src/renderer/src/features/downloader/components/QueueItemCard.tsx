@@ -211,9 +211,19 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     onToggleLogs(item.id)
   }
 
-  const handleCopyFilename = (e: React.MouseEvent): void => {
+  const handleFilenameClick = (e: React.MouseEvent): void => {
     e.stopPropagation()
     if (item.filename) {
+      if (e.ctrlKey) {
+        // - 저장 경로와 파일명을 조합하여 전체 경로 생성
+        const fullPath = `${item.savePath}/${item.filename}`
+        requestOpenPath(fullPath).then((err) => {
+          if (err) {
+            showToast(`파일을 열 수 없습니다: ${err}`)
+          }
+        })
+        return
+      }
       navigator.clipboard.writeText(item.filename)
       showToast('파일명이 복사되었습니다.')
     }
@@ -243,8 +253,12 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           </div>
           <p
             className={styles.urlText}
-            title={item.filename ? '클릭하여 파일명 복사' : '클릭하여 URL 복사'}
-            onClick={item.filename ? handleCopyFilename : handleCopyUrl}
+            title={
+              item.filename
+                ? '클릭하여 파일명 복사 / Ctrl+클릭하여 동영상 플레이어로 열기'
+                : '클릭하여 URL 복사 / Ctrl+클릭하여 브라우저에서 열기'
+            }
+            onClick={item.filename ? handleFilenameClick : handleCopyUrl}
           >
             {item.filename || item.url}
           </p>
@@ -354,9 +368,8 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                   item.logs.map((log, i) => {
                     const isWarning = log.toLowerCase().includes('warning')
                     const isError = log.toLowerCase().includes('error')
-                    const logLineClass = `${styles.logLine} ${isWarning ? styles.logWarning : ''} ${
-                      isError ? styles.logError : ''
-                    }`.trim()
+                    const logLineClass = `${styles.logLine} ${isWarning ? styles.logWarning : ''} ${isError ? styles.logError : ''
+                      }`.trim()
 
                     return (
                       <div key={i} className={logLineClass}>
